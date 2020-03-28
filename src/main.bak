@@ -1,0 +1,107 @@
+#include "pgl.h"
+#include "window.h"
+#include "egl.h"
+#include "image.h"
+
+#include "commongl.h"
+#include "shader.h"
+#include "mesh.h"
+#include "texture.h"
+#include "math.h"
+
+
+#if defined(__arm__) && defined(__unix__)
+#define WIDTH 1920
+#define HEIGHT 1080
+#else
+#define WIDTH 640
+#define HEIGHT 400
+#endif
+
+PGLWindow window;
+Mesh* mesh;
+
+void update(double);
+void mouseMove(int, int);
+void keyUp(const char *);
+void keyDown(const char *);
+
+int main(void)
+{
+  // Create a new window for render output
+  window = pglCreateWindow(WIDTH, HEIGHT);
+  //assert(window != NULL);
+  pglInitEgl(window);
+
+  glViewport(0,0, WIDTH, HEIGHT);
+
+  shader_init();
+
+  // glm_mat4_identity(model);
+  // vec3 r = { 1, 0, 0 };
+  // glm_rotate(model, glm_rad(-55), r);
+  // setModelTransform(model);
+    
+  Vertex vertexData[] = {
+    { .position = VEC3(-0.5f,  0.5f, 0.0f), .color = COLOR3(255,0,255), .texcoord = VEC2(0,1) },
+    { .position = VEC3(-0.5f, -0.5f, 0.0f), .color = COLOR3(255,255,0), .texcoord = VEC2(0,0) },
+    { .position = VEC3(0.5f, -0.5f, 0.0f), .color = COLOR3(0,255,255), .texcoord = VEC2(1,0) },
+    { .position = VEC3(0.5f, 0.5f, 0.0f), .color = COLOR3(0,255,0), .texcoord = VEC2(1,1) },
+  };
+
+  unsigned short indexData[] = {
+    0, 1, 2,
+    0, 2, 3 
+  };
+
+  mesh = createMesh(vertexData, 4, indexData, 6);
+
+  PGLImage* image = pglLoadImage("./assets/test.png", 4);
+  Texture* texture = createTextureFromImage(image); 
+  pglDestroyImage(image);
+
+  PGLPlatformCallbacks callbacks = {
+    .update = &update,
+    .mouseMove = &mouseMove,
+    .keyUp = &keyUp,
+    .keyDown = &keyDown
+  };
+
+  pglRegisterCallbacks(&callbacks);
+  pglRun();
+}
+
+float rot = 0;
+float rad = 0;
+float mousex = 0;
+float mousey = 0;
+
+void update(double delta){
+  //printf("delta: %f\n", delta);
+  //moveCamera(0,0,-0.25*delta);
+  rot = (mousex / (WIDTH * 0.1));
+  rad = 0.5f + (mousey / (HEIGHT * 0.1));
+  rotateCameraTo(rad,rot);
+  glClearColor(1, 1, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  bindMesh(mesh);
+  drawMesh(mesh);
+  
+  glCheckError();
+  pglPresent();
+}
+
+void mouseMove(int x, int y){
+  mousex = x;
+  mousey = y;
+  //printf("Mouse x: %i, y: %i\n", x, y);
+}
+
+void keyUp(const char* key){
+  printf("Up: %s\n", key);
+}
+
+void keyDown(const char* key){
+  printf("Down: %s\n", key);
+}
