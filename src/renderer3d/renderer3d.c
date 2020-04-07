@@ -21,6 +21,10 @@ GLuint shader;
 int uniforms[PGL_UNI3D_MAX];
 int attributeLocations[PGL_ATTR_MAX];
 
+static void vec3_print(vec3 vec){
+  printf("%f, %f, %f\n", vec[0], vec[1], vec[2]);
+}
+
 static void updateProjection()
 {
   glm_perspective(glm_rad(fov), aspect, near, far, projection);
@@ -35,23 +39,15 @@ static void updateView()
   glUniformMatrix4fv(uniforms[PGL_UNI3D_VIEW], 1, GL_FALSE, (float *)view);
 }
 
-static void updateView3(vec3 eye, vec3 target, vec3 up){
+void pgl3DSetCamera(float* eye, float* target, float* up) {
   glm_lookat(eye, target, up, view);
   glUniformMatrix4fv(uniforms[PGL_UNI3D_VIEW], 1, GL_FALSE, (float *)view);
 }
-
-// static void setModelTransform(float* matrix){
-//    glUniformMatrix4fv(shader3d.modelLocation, 1, GL_FALSE, (float*)matrix);
-// }
 
 static void resetModelTransform()
 {
   glUniformMatrix4fv(uniforms[PGL_UNI3D_MODEL], 1, GL_FALSE, (float *)ident);
 }
-
-// static float _getCameraRadius(){
-//    return glm_vec3_distance(eye, target);
-// }
 
 void pgl3DSetViewport(float width, float height){
   glViewport(0,0, (GLsizei)width, (GLsizei)height);
@@ -59,45 +55,12 @@ void pgl3DSetViewport(float width, float height){
   updateProjection();
 }
 
-void pgl3DOrbitCamera(float rad, float gamma)
-{
-  eye[0] = sin(gamma) * rad;
-  eye[2] = cos(gamma) * rad;
-  updateView();
-}
-
-void moveCamera(float x, float y, float z)
-{
-  eye[0] += x;
-  eye[1] += y;
-  eye[2] += z;
-  updateView();
-}
-
-static void vec3_print(vec3 vec){
-  printf("%f, %f, %f\n", vec[0], vec[1], vec[2]);
-}
-
-void pgl3DSetCameraTransform(PGLTransform* transform){
-  vec4 _eye = {0,0,0,1};
-  vec4 _target = {1,0,0,1};
-  vec4 _up = {0,1,0,0};
-  vec4 e, t, u;
-  float* mat = pglTransformMatrix(transform);
-  glm_mat4_mulv(mat, _eye, e);
-  glm_mat4_mulv(mat, _target, t);
-  glm_mat4_mulv(mat, _up, u);
-  eye[0] = e[0];
-  eye[1] = e[1];
-  eye[2] = e[2];
-  target[0] = t[0];  
-  target[1] = t[1];  
-  target[2] = t[2];
-  up[0] = u[0];  
-  up[1] = u[1];    
-  up[2] = u[2];
-  updateView();  
-}
+// void pgl3DOrbitCamera(float rad, float gamma)
+// {
+//   eye[0] = sin(gamma) * rad;
+//   eye[2] = cos(gamma) * rad;
+//   updateView();
+// }
 
 void pgl3DSetModelTransform(PGLTransform* transform){
   glUniformMatrix4fv(uniforms[PGL_UNI3D_MODEL], 1, GL_FALSE, pglTransformMatrix(transform));

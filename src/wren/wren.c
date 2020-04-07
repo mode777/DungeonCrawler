@@ -108,13 +108,13 @@ void pglInitWren(const char * mainPath)
   vm = wrenNewVM(&config); 
   
   pgl_wren_bind_api();
-  pglRunWrenFile("json", "./assets/scripts/json.wren");
-  pglRunWrenFile("PGL", "./assets/scripts/pgl.wren");
-  pglRunWrenFile("gltf", "./assets/scripts/gltf.wren");
+  pglRunWrenFile("json", "./scripts/json.wren");
+  pglRunWrenFile("pgl", "./scripts/pgl.wren");
+  pglRunWrenFile("gltf", "./scripts/gltf.wren");
   pglRunWrenFile("main", mainPath);
 
   wrenEnsureSlots(vm, 1); 
-  wrenGetVariable(vm, "PGL", "Game", 0); 
+  wrenGetVariable(vm, "pgl", "Game", 0); 
   gameClass = wrenGetSlotHandle(vm, 0);
   updateMethod = wrenMakeCallHandle(vm, "update(_)");
   initMethod = wrenMakeCallHandle(vm, "init()");

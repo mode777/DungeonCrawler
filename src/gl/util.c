@@ -31,10 +31,12 @@ const char* pglGetGlErrorString(GLenum const err){
 
 
 void pglCheckGlErrorImpl(const char* fname, int line){
+  #ifdef PGL_DEBUG
    GLenum error = glGetError();
 
   if(error != GL_NO_ERROR){
     pglLog(PGL_MODULE_GL, PGL_LOG_ERROR, "GL Error: %s in file %s, line: %i", pglGetGlErrorString(error), fname, line);    
     assert(0);
   }
+  #endif
 }

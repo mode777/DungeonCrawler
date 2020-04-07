@@ -37,7 +37,7 @@ main.exe: $(OBJECTS)
 	gcc -o $@ $(OBJECTS) $(LIBFLAGS_WIN32)
 
 main.wasm: $(OBJECTS_WASM)
-	emcc -o main.html $(OBJECTS_WASM) -s WASM=1 -s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1 --shell-file html/template.html --preload-file shaders --preload-file assets --preload-file main.wren
+	emcc -o main.html $(OBJECTS_WASM) -s WASM=1 -s USE_SDL=2 -s ALLOW_MEMORY_GROWTH=1 --shell-file html/template.html --preload-file shaders --preload-file scripts --preload-file assets --preload-file main.wren
 
 %.o: %.c
 	gcc -O2 -Wall -o $@ -c $< -fPIC $(INCLUDEFLAGS)

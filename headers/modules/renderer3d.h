@@ -13,23 +13,23 @@ typedef enum {
 
 typedef struct PGLTransform_T PGLTransform;
 
-void pgl3DOrbitCamera(float rad, float gamma);
-// void pgl3DDollyCamera(float amount);
-// void pgl3DPanCamera();
-// void pgl3DSwingCamera();
-void pgl3DSetModelTransform(PGLTransform* transform);
 void pgl3DInit();
+void pgl3DSetModelTransform(PGLTransform* transform);
 void pgl3DSetViewport(float width, float height);
 void pgl3DDrawPrimitive(PGLPrimitive *prim);
-void pgl3DSetCameraTransform(PGLTransform* transform);
+void pgl3DSetCamera(float* eye, float* target, float* up);
 
 PGLTransform* pglTransformCreate();
+void pglTransformLoad(PGLTransform* transform, PGLTransform* source);
+void pglTransformApply(PGLTransform* transform, PGLTransform* source);
 void pglTransformReset(PGLTransform* trans);
 void pglTransformRotate(PGLTransform* transform, float x, float y, float z);
 void pglTransformScale(PGLTransform* transform, float x, float y, float z);
 void pglTransformTranslate(PGLTransform* transform, float x, float y, float z);
 void pglTransformLoadMatrix(mat4 matrix);
+void pglTransformVector(PGLTransform* trans, float* in, float* out);
 float* pglTransformMatrix(PGLTransform* transform);
 void pglTransformDelete(PGLTransform* transform);
+
 
 #endif
