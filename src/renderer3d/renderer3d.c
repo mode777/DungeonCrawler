@@ -97,6 +97,25 @@ void pgl3DInit()
   updateProjection();
 }
 
+void pglAttributeEnable(PGLAttribute2* a){
+  PGLAttribute2 attr = *a;
+  int location = attributeLocations[attr.type];
+    
+  if(location == -1)
+    return;
+
+  glBindBuffer(GL_ARRAY_BUFFER, attr.buffer);
+
+  glVertexAttribPointer(location, attr.numComponents, attr.componentType, attr.normalized, attr.stride, (void*)attr.offset);
+  glEnableVertexAttribArray(location);
+}
+
+void pglIndicesDraw(PGLVertexIndices* i) {
+  PGLVertexIndices idx = *i;
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx.buffer);
+  glDrawElements(GL_TRIANGLES, idx.count, idx.componentType, 0);
+}
+
 void pgl3DDrawPrimitive(PGLPrimitive *prim){
   for (size_t i = 0; i < prim->attributeCount; i++)
   {

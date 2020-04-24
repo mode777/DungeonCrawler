@@ -17,6 +17,7 @@ typedef struct {
 
 Binding* bindings = NULL;
 ClassBinding* classBindings = NULL;
+char strbuffer[1024];
 
 const void errorFunc(WrenVM *vm, WrenErrorType type, const char *module, int line, const char *message)
 {  
@@ -84,18 +85,51 @@ WrenForeignClassMethods bindClassFunc(
 }
 
 static char* loadModule(WrenVM* vm, const char* name){
-  printf("should load Module %s\n", name);
+  strcpy(strbuffer, name);
+  strcat(strbuffer, ".wren");
+
+  PGLFile* file = pglFileOpen(strbuffer, "rb");
+  
+  if(file != NULL){
+    size_t read;
+    return pglFileReadString(file, pglFileSize(file), &read);
+  }
+
+  strcpy(strbuffer, "./scripts/");
+  strcat(strbuffer, name);
+  strcat(strbuffer, ".wren");
+  
+  file = pglFileOpen(strbuffer, "rb");
+  if(file != NULL){
+    size_t read;
+    return pglFileReadString(file, pglFileSize(file), &read);
+  }
+
   return NULL;
 }
 
 static WrenVM* vm;
-static WrenHandle* gameClass;
+static WrenHandle* appClass;
 static WrenHandle* updateMethod;
 static WrenHandle* initMethod;
 static WrenHandle* loadMethod;
+static int myargc;
+static char** myargv;
 
-void pglInitWren(const char * mainPath)
+void pglInitWren(int argc, char **argv)
 {
+  myargc = argc;
+  myargv = argv;
+
+  const char* mainPath;
+  if(argc == 2){
+    mainPath = argv[1];
+  }
+  else {
+    pglLog(PGL_MODULE_CORE, PGL_LOG_WARNING, "Falling back to default script");
+    mainPath = "./main.wren";
+  }
+
   WrenConfiguration config;
   wrenInitConfiguration(&config);
   
@@ -108,16 +142,19 @@ void pglInitWren(const char * mainPath)
   vm = wrenNewVM(&config); 
   
   pgl_wren_bind_api();
-  pglRunWrenFile("json", "./scripts/json.wren");
-  pglRunWrenFile("pgl", "./scripts/pgl.wren");
-  pglRunWrenFile("gltf", "./scripts/gltf.wren");
+  //pglRunWrenFile("application", "./scripts/application.wren");
   pglRunWrenFile("main", mainPath);
 
+  if(vm == NULL)
+    return;
+
   wrenEnsureSlots(vm, 1); 
-  wrenGetVariable(vm, "pgl", "Game", 0); 
-  gameClass = wrenGetSlotHandle(vm, 0);
+  //TODO: This will SEGFAULT if platform module is not loaded
+  wrenGetVariable(vm, "platform", "Application", 0); 
+
+  appClass = wrenGetSlotHandle(vm, 0);
   updateMethod = wrenMakeCallHandle(vm, "update(_)");
-  initMethod = wrenMakeCallHandle(vm, "init()");
+  initMethod = wrenMakeCallHandle(vm, "init(_)");
   loadMethod = wrenMakeCallHandle(vm, "load()");
 }
 
@@ -129,6 +166,9 @@ static void shutdown(){
 } 
 
 void pglRunWrenFile(const char* module, const char* file){
+  if(vm == NULL)
+    return;
+
   char* content = pglFileReadAllText(file);
 
   if(content == NULL){
@@ -154,7 +194,7 @@ void pglCallWrenUpdate(double delta){
   if(vm != NULL){
 
     wrenEnsureSlots(vm, 2); 
-    wrenSetSlotHandle(vm, 0, gameClass);
+    wrenSetSlotHandle(vm, 0, appClass);
     wrenSetSlotDouble(vm, 1, delta);
     if(wrenCall(vm, updateMethod) != WREN_RESULT_SUCCESS){
       shutdown();
@@ -165,8 +205,15 @@ void pglCallWrenUpdate(double delta){
 void pglCallWrenInit(){
   if(vm != NULL){
 
-    wrenEnsureSlots(vm, 1); 
-    wrenSetSlotHandle(vm, 0, gameClass);
+    wrenEnsureSlots(vm, 2); 
+    wrenSetSlotNewList(vm, 1);
+    for (int i = 0; i < myargc; i++)
+    {
+      wrenSetSlotString(vm, 0, myargv[i]);
+      wrenInsertInList(vm, 1, -1, 0);
+    }
+    wrenSetSlotHandle(vm, 0, appClass);
+    
     if(wrenCall(vm, initMethod) != WREN_RESULT_SUCCESS){
       shutdown();
     }
@@ -177,7 +224,7 @@ void pglCallWrenLoad(){
   if(vm != NULL){
 
     wrenEnsureSlots(vm, 1); 
-    wrenSetSlotHandle(vm, 0, gameClass);
+    wrenSetSlotHandle(vm, 0, appClass);
     if(wrenCall(vm, loadMethod) != WREN_RESULT_SUCCESS){
       shutdown();
     }

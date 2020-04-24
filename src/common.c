@@ -33,9 +33,9 @@ void pglLog(PGLModule mod, PGLLogSeverity sev, const char *formatStr, ...)
 {
   //printf("%i, %i %i\n", mod, sev, levels[mod]);
   //if(sev > PGL_LOG_INFO)
-  //if(levels[mod] >= sev){
-    //return;
-  //}
+  if((int)levels[mod] < sev){
+    return;
+  }
 
   va_list params;
   char buf[BUFSIZ];
@@ -50,12 +50,12 @@ void pglLog(PGLModule mod, PGLLogSeverity sev, const char *formatStr, ...)
 }
 
 void pglLogLevel(PGLLogSeverity sev){
-  for (size_t i = 0; i < PGL_MODULE_ALL; i++)
+  for (int i = 0; i < PGL_MODULE_ALL; i++)
   {
     levels[i] = sev;  
   }  
 }
 
-void pglModLogLevel(PGLModule mod, PGLLogSeverity sev){
+void pglLogModLevel(PGLModule mod, PGLLogSeverity sev){
   levels[mod] = sev;  
 }

@@ -1,52 +1,114 @@
 #include "wrenapi.h"
 
+static void pgl_wren_runtime_error(WrenVM* vm, const char * error){
+  wrenSetSlotString(vm, 0, error); 
+  wrenAbortFiber(vm, 0);
+}
+
 #include "platform.inc.c"
 #include "io.inc.c"
 #include "renderer.inc.c"
-#include "gl.inc.c"
+#include "graphics.inc.c"
 #include "json.inc.c"
 #include "image.inc.c"
+#include "memory.inc.c"
 
 void pgl_wren_bind_api(){
   
   // platform
-  pgl_wren_bind_method("pgl.Keyboard.isDown(_)", Keyboard_isDown_1);  
-  pgl_wren_bind_method("pgl.Window.config(_,_,_)", Window_config_3);
-  
+  pgl_wren_bind_method("platform.Keyboard.isDown(_)", Keyboard_isDown_1);  
+  pgl_wren_bind_method("platform.Window.config(_,_,_)", Window_config_3);
+  pgl_wren_bind_method("platform.Application.logLevel(_)", Application_logLevel_1);
+  pgl_wren_bind_method("platform.Application.logLevel(_,_)", Application_logLevel_2);
+  pgl_wren_bind_method("platform.Application.quit()", Application_quit_0);
+
   //io
-  pgl_wren_bind_class("pgl.File", File_allocate, File_finalize);
-  pgl_wren_bind_method("pgl.File.length()", File_length_0);
-  pgl_wren_bind_method("pgl.File.close()", File_close_0);
-  pgl_wren_bind_method("pgl.File.read(_)", File_read_1);
+  pgl_wren_bind_class("io.File", File_allocate, File_finalize);
+  pgl_wren_bind_method("io.File.length()", File_length_0);
+  pgl_wren_bind_method("io.File.close()", File_close_0);
+  pgl_wren_bind_method("io.File.read(_)", File_read_1);
 
   //json
-  pgl_wren_bind_class("json.JSONParser", JSONParser_allocate, JSONParser_finalize);
-  pgl_wren_bind_method("json.JSONParser.getValue()", JSONParser_getValue_0);
-  pgl_wren_bind_method("json.JSONParser.getToken()", JSONParser_getToken_0);
-  pgl_wren_bind_method("json.JSONParser.nextToken()", JSONParser_nextToken_0);
-  pgl_wren_bind_method("json.JSONParser.getChildren()", JSONParser_getChildren_0);
+  pgl_wren_bind_class("json.JsonParser", JSONParser_allocate, JSONParser_finalize);
+  pgl_wren_bind_method("json.JsonParser.getValue()", JSONParser_getValue_0);
+  pgl_wren_bind_method("json.JsonParser.getToken()", JSONParser_getToken_0);
+  pgl_wren_bind_method("json.JsonParser.nextToken()", JSONParser_nextToken_0);
+  pgl_wren_bind_method("json.JsonParser.getChildren()", JSONParser_getChildren_0);
   
   //image
-  pgl_wren_bind_class("pgl.Image", Image_allocate, Image_finalize);
-  
-  //gl
-  pgl_wren_bind_class("pgl.Buffer", Buffer_allocate, Buffer_finalize);
-  pgl_wren_bind_class("pgl.GeometryBuffer", GeometryBuffer_allocate, GeometryBuffer_finalize);
-  pgl_wren_bind_class("pgl.Attribute", Attribute_allocate, Attribute_finalize);
-  pgl_wren_bind_class("pgl.Primitive", Primitive_allocate, Primitive_finalize);
-  pgl_wren_bind_class("pgl.Texture", Texture_allocate, Texture_finalize);
-  pgl_wren_bind_class("pgl.Material", Material_allocate, Material_finalize);
+  pgl_wren_bind_class("image.Image", Image_allocate, Image_finalize);
+  pgl_wren_bind_method("image.Image.load(_)", Image_load_1);
+  pgl_wren_bind_method("image.Image.buffer(_,_,_)", Image_buffer_3);
+  pgl_wren_bind_method("image.Image.allocate(_,_)", Image_allocate_2);
+  pgl_wren_bind_method("image.Image.put(_,_,_,_,_,_,_)", Image_put_7);
+  pgl_wren_bind_method("image.Image.setPixel(_,_,_,_,_,_)", Image_setPixel_6);
+  pgl_wren_bind_method("image.Image.setPixel(_,_,_)", Image_setPixel_3);
+  pgl_wren_bind_method("image.Image.getPixel(_,_,_)", Image_getPixel_3);
+  pgl_wren_bind_method("image.Image.save(_)", Image_save_1);
+  pgl_wren_bind_method("image.Image.getWidth()", Image_getWidth_0);
+  pgl_wren_bind_method("image.Image.getHeight()", Image_getHeight_0);
 
-  //renderer
-  pgl_wren_bind_class("pgl.Transform", Transform_allocate, Transform_finalize);
-  pgl_wren_bind_method("pgl.Transform.translate(_,_,_)", Transform_translate_3);
-  pgl_wren_bind_method("pgl.Transform.rotate(_,_,_)", Transform_rotate_3);
-  pgl_wren_bind_method("pgl.Transform.scale(_,_,_)", Transform_scale_3);
-  pgl_wren_bind_method("pgl.Transform.reset()", Transform_reset_0);
-  pgl_wren_bind_method("pgl.Transform.load(_)", Transform_load_1);
-  pgl_wren_bind_method("pgl.Transform.apply(_)", Transform_apply_1);
-  pgl_wren_bind_method("pgl.Transform.transformVectors(_)", Transform_transformVectors_1);
-  pgl_wren_bind_method("pgl.Renderer.render(_)", Renderer_render_1);
-  pgl_wren_bind_method("pgl.Renderer.setTransform(_)", Renderer_setTransform_1);
-  pgl_wren_bind_method("pgl.Renderer.setCameraCoords(_,_,_,_,_,_,_,_,_)", Renderer_setCamera_9);
+  //geometry
+  pgl_wren_bind_class("geometry.Transform", Transform_allocate, Transform_finalize);
+  pgl_wren_bind_method("geometry.Transform.translate(_,_,_)", Transform_translate_3);
+  pgl_wren_bind_method("geometry.Transform.rotate(_,_,_)", Transform_rotate_3);
+  pgl_wren_bind_method("geometry.Transform.scale(_,_,_)", Transform_scale_3);
+  pgl_wren_bind_method("geometry.Transform.reset()", Transform_reset_0);
+  pgl_wren_bind_method("geometry.Transform.load(_)", Transform_load_1);
+  pgl_wren_bind_method("geometry.Transform.apply(_)", Transform_apply_1);
+  pgl_wren_bind_method("geometry.Transform.transformVectors(_)", Transform_transformVectors_1);
+
+  //graphics
+  pgl_wren_bind_class("graphics.Texture", Texture_allocate, Texture_finalize);
+  pgl_wren_bind_method("graphics.Texture.image(_)", Texture_image_1);
+  pgl_wren_bind_class("graphics.GraphicsBuffer", GraphicsBuffer_allocate, GraphicsBuffer_finalize);
+  pgl_wren_bind_method("graphics.GraphicsBuffer.init(_,_,_,_)", GraphicsBuffer_init_4);
+  pgl_wren_bind_class("graphics.InternalAttribute", InternalAttribute_allocate, InternalAttribute_finalize);
+  pgl_wren_bind_method("graphics.InternalAttribute.enable()", InternalAttribute_enable_0);
+  pgl_wren_bind_class("graphics.InternalVertexIndices", InternalVertexIndices_allocate, InternalVertexIndices_finalize);
+  pgl_wren_bind_method("graphics.InternalVertexIndices.draw()", InternalVertexIndices_draw_0);
+  pgl_wren_bind_method("graphics.Renderer.render(_)", Renderer_render_1);
+  pgl_wren_bind_method("graphics.Renderer.setTransform(_)", Renderer_setTransform_1);
+  pgl_wren_bind_method("graphics.Renderer.setCameraCoords(_,_,_,_,_,_,_,_,_)", Renderer_setCamera_9);
+  pgl_wren_bind_method("graphics.Renderer.getErrors()", Renderer_getErrors_0);
+
+  //memory
+  pgl_wren_bind_class("memory.Buffer", Buffer_allocate, Buffer_finalize);
+  pgl_wren_bind_method("memory.Buffer.init_load(_)", Buffer_init_load_1);
+  pgl_wren_bind_method("memory.Buffer.init_allocate(_)", Buffer_init_allocate_1);
+  pgl_wren_bind_method("memory.Buffer.init_copy(_,_,_)", Buffer_init_copy_3);
+  pgl_wren_bind_method("memory.Buffer.copyFrom(_,_,_,_)", Buffer_copyFrom_4);
+  pgl_wren_bind_method("memory.Buffer.getSize()", Buffer_getSize_0);
+  pgl_wren_bind_method("memory.Buffer.readByte(_)", Buffer_readByte_1);
+  pgl_wren_bind_method("memory.Buffer.readShort(_)", Buffer_readShort_1);
+  pgl_wren_bind_method("memory.Buffer.readInt(_)", Buffer_readInt_1);
+  pgl_wren_bind_method("memory.Buffer.readUByte(_)", Buffer_readUByte_1);
+  pgl_wren_bind_method("memory.Buffer.readUShort(_)", Buffer_readUShort_1);
+  pgl_wren_bind_method("memory.Buffer.readUInt(_)", Buffer_readUInt_1);
+  pgl_wren_bind_method("memory.Buffer.readFloat(_)", Buffer_readFloat_1);
+  pgl_wren_bind_method("memory.Buffer.readDouble(_)", Buffer_readDouble_1);
+  pgl_wren_bind_method("memory.Buffer.readByteVec(_,_)", Buffer_readByteVec_2);
+  pgl_wren_bind_method("memory.Buffer.readShortVec(_,_)", Buffer_readShortVec_2);
+  pgl_wren_bind_method("memory.Buffer.readIntVec(_,_)", Buffer_readIntVec_2);
+  pgl_wren_bind_method("memory.Buffer.readUByteVec(_,_)", Buffer_readUByteVec_2);
+  pgl_wren_bind_method("memory.Buffer.readUShortVec(_,_)", Buffer_readUShortVec_2);
+  pgl_wren_bind_method("memory.Buffer.readUIntVec(_,_)", Buffer_readUIntVec_2);
+  pgl_wren_bind_method("memory.Buffer.readFloatVec(_,_)", Buffer_readFloatVec_2);
+  pgl_wren_bind_method("memory.Buffer.readDoubleVec(_,_)", Buffer_readDoubleVec_2);
+  pgl_wren_bind_method("memory.Buffer.writeByte(_,_)", Buffer_writeByte_2);
+  pgl_wren_bind_method("memory.Buffer.writeShort(_,_)", Buffer_writeShort_2);
+  pgl_wren_bind_method("memory.Buffer.writeInt(_,_)", Buffer_writeInt_2);
+  pgl_wren_bind_method("memory.Buffer.writeUByte(_,_)", Buffer_writeUByte_2);
+  pgl_wren_bind_method("memory.Buffer.writeUShort(_,_)", Buffer_writeUShort_2);
+  pgl_wren_bind_method("memory.Buffer.writeUInt(_,_)", Buffer_writeUInt_2);
+  pgl_wren_bind_method("memory.Buffer.writeFloat(_,_)", Buffer_writeFloat_2);
+  pgl_wren_bind_method("memory.Buffer.writeDouble(_,_)", Buffer_writeDouble_2);
+  pgl_wren_bind_method("memory.Buffer.writeByteVec(_,_)", Buffer_writeByteVec_2);
+  pgl_wren_bind_method("memory.Buffer.writeShortVec(_,_)", Buffer_writeShortVec_2);
+  pgl_wren_bind_method("memory.Buffer.writeIntVec(_,_)", Buffer_writeIntVec_2);
+  pgl_wren_bind_method("memory.Buffer.writeUByteVec(_,_)", Buffer_writeUByteVec_2);
+  pgl_wren_bind_method("memory.Buffer.writeUShortVec(_,_)", Buffer_writeUShortVec_2);
+  pgl_wren_bind_method("memory.Buffer.writeUIntVec(_,_)", Buffer_writeUIntVec_2);
+  pgl_wren_bind_method("memory.Buffer.writeFloatVec(_,_)", Buffer_writeFloatVec_2);
+  pgl_wren_bind_method("memory.Buffer.writeDoubleVec(_,_)", Buffer_writeDoubleVec_2);
 }

@@ -4,7 +4,6 @@
 #include "common.h"
 #include <GLES2/gl2.h>
 #include <cglm/cglm.h>
-#include <modules/image.h>
 
 typedef unsigned char color[4];
 
@@ -44,6 +43,22 @@ typedef struct {
   GLboolean normalized;
 } PGLAttribute;
 
+typedef struct { 
+  GLuint buffer;
+  PGLAttributeType type;
+  int numComponents;
+  GLenum componentType;
+  int stride;
+  int offset;
+  GLboolean normalized;
+} PGLAttribute2;
+
+typedef struct {
+  GLuint buffer;
+  GLenum componentType;
+  int count;
+} PGLVertexIndices;
+
 typedef struct {
   GLsizei attributeCount;
   PGLAttribute* attributes;
@@ -59,9 +74,9 @@ void pglCheckGlErrorImpl(const char* fname, int line);
 GLuint pglLoadProgram(const char *vertShaderSrc, const char *fragShaderSrc);
 GLuint pglLoadProgramFile(const char *vertShaderFile, const char *fragShaderFile);
 
-PGLTexture* pglCreateTexture(PGLImage* image);
-PGLTexture* pglTakeTexture(PGLTexture* texture);
-void pglReleaseTexture(PGLTexture* texture);
+PGLTexture* pglTextureFromMemory(void* pixels, int width, int height, int channels);
+PGLTexture* pglTextureTake(PGLTexture* texture);
+void pglTextureDelete(PGLTexture* texture);
 
 PGLGeometryBuffer* pglCreateGeometryBuffer(void* data, GLsizei offset, GLsizei size, GLsizei stride, bool areIndices);
 PGLGeometryBuffer* pglTakeGeometryBuffer(PGLGeometryBuffer* buffer);

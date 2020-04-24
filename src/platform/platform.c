@@ -171,3 +171,7 @@ bool pglIsKeyDown(const char* key){
   return state[code];
 }
 
+void pglQuit(){
+  quit = SDL_TRUE;
+}
+

@@ -1,24 +1,28 @@
-import "pgl" for Game, Keyboard, File, Renderer, Window, Transform, Camera
-import "gltf" for GLTF
+import "platform" for Application, Keyboard, Window, Severity
+import "graphics" for Transform, Camera, Renderer
+import "gltf" for Gltf
 
 var mesh = null
+var texture = null
 var transform = null
 var camera = null
 
-Game.onInit {
+Application.onInit {
+  Application.logLevel(Severity.Debug)
   Window.config(800,480,"WrenGame!")
 }
 
-Game.onLoad {
+Application.onLoad {
+  System.print("LOAD!!!!")
   //var gltf = GLTF.load("./assets/desert/scene2.gltf")
-  var gltf = GLTF.load("./assets/blocks/stone1.gltf")
-  mesh = gltf.meshes[0]
-
+  var gltf = Gltf.fromFile("./assets/blocks/stone1.gltf")
+  mesh = gltf.meshes[0].toGraphicsMesh()
+  texture = gltf.textures[0].toGraphicsTexture()
   transform = Transform.new()
   camera = Camera.new()
 }
 
-Game.onUpdate {|delta|   
+Application.onUpdate {|delta|   
   
   if(Keyboard.isDown("w")){
     camera.rotate(0,0, 0.02)
@@ -64,7 +68,8 @@ Game.onUpdate {|delta|
       transform.reset()
       transform.translate(x,-1,0.5*y)        
       Renderer.setTransform(transform)
-      mesh.render()    
+      mesh.draw()    
+      Renderer.checkErrors()
     }      
   }  
 }

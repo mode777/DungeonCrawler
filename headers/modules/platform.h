@@ -44,6 +44,6 @@ char* pglFileReadBytes(PGLFile file, long size, size_t* read);
 void pglFileClose(PGLFile file);
 char* pglFileReadAllText(const char* filename);
 char* pglFileReadAllBytes(const char* filename);
-
+void pglQuit();
 
 #endif

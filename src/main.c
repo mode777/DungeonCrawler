@@ -1,6 +1,6 @@
 #include <modules/modules.h>
 
-
+//#define PGL_DEBUG
 
 PGLWindow* window;
 
@@ -21,17 +21,10 @@ static void vec3_print(vec3 vec){
 
 int main(int argc, char *argv[])
 {
-  //pglLogLevel(PGL_LOG_INFO);
-  //pglModLogLevel(PGL_MODULE_WREN, PGL_LOG_INFO);
-  pglLog(PGL_MODULE_UNKNOWN, PGL_LOG_WARNING, "running");
+  pglLogLevel(PGL_LOG_WARNING);
+  //pglLogModLevel(PGL_MODULE_WREN, PGL_LOG_DEBUG);
 
-  if(argc == 2){
-    pglInitWren(argv[1]);
-  }
-  else {
-    pglLog(PGL_MODULE_CORE, PGL_LOG_WARNING, "Falling back to default script");
-    pglInitWren("./main.wren");
-  }
+  pglInitWren(argc, argv);
 
   pglPlatformInit();
 

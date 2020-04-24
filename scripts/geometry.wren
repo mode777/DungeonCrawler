@@ -1,82 +1,41 @@
-foreign class Buffer {
-  construct new(size){
-    allocate(size)
-  }
-  construct fromBuffer(buffer, offset, size){
-    copy(buffer, offset, size)
-  }
-  construct fromFile(path){
-    load(path)
-  }
+import "memory" for Buffer, BufferView
 
-  foreign load(path)
-  foreign allocate(size)
-  foreign copy(buffer, offset, size)
-
-  foreign getSize()
-  // foreign readByte(offset)
-  // foreign readUByte(offset)
-  // foreign readShort(offset)
-  // foreign readUShort(offset)
-  // foreign readInt(offset)
-  // foreign readUInt(offset)
-  // foreign readFloat(offset)
-  // foreign readVec2(offset, vec2)
-  // foreign readVec3(offset, vec3)
-  // foreign readVec4(offset, vec4)
-  // foreign readDouble(offset)
-  // foreign getBytes(offset, size)
-}
-
-foreign class BufferView {
-  construct new(buffer, offset, size){
-    buffer(buffer, offset, size)
-  }
-
-  foreign buffer(buffer, offset, size)
-  
-  foreign getSize()
-}
-
-foreign class ImageData {  
-  construct new(width, height, channels){
-    allocate(width, height, channels)
-  }
-  construct fromBufferView(view){
-    bufferView(view)
-  }
-  construct fromFile(path, channels){
-    load(path, channels)
-  }
-
-  foreign load(path, channels)
-  foreign bufferView(view)
-  foreign allocate(width, height, channels)
-  foreign put(imgData, x, y)
-
-  foreign getWidth()
-  foreign getHeight()
-  foreign getChannels()
-}
-
-foreign class Texture {
-  construct new(imgData){
-    data(imgData)
-  }
-
-  foreign data(imgData)
-}
-
-class BufferView {
-  construct new(buffer, offset, size){
-    _buffer = buffer
-  }
-}
-
-class Attribute {
-
+class AttributeType {
+  static Unknown { 0 }
+  static Position { 1 }
+  static Color { 2 }
+  static Normal { 3 }
+  static Tangent { 4 }
+  static Texcoord0 { 5 }
+  static Texcoord1 { 6 }
 }
 
 class GeometryData {
+  
+  indices { _indices }
+  count { _attributes.count }
+  
+  construct new(attributes, indices){
+    _attributes = attributes
+    _indices = indices
+  }
 
+  [acc] { _attributes[acc] }
+
+  iterate(val) { _attributes.keys.iterate(val) }
+  iteratorValue(val) { _attributes.keys.iteratorValue(val) }
+}
+
+foreign class Transform {
+  construct new(){}
+  construct copy(transform){
+    load(transform)
+  }
+  foreign translate(x, y, z)
+  foreign rotate(x, y, z)
+  foreign scale(x, y, z)
+  foreign reset()
+  foreign load(transform)
+  foreign apply(transform)
+  foreign transformVectors(vecs)
 }

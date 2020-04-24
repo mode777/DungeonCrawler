@@ -31,5 +31,7 @@ void pglTransformVector(PGLTransform* trans, float* in, float* out);
 float* pglTransformMatrix(PGLTransform* transform);
 void pglTransformDelete(PGLTransform* transform);
 
+void pglAttributeEnable(PGLAttribute2* attr);
+void pglIndicesDraw(PGLVertexIndices* idx);
 
 #endif

@@ -9,5 +9,6 @@
 //#include "gltf.h"
 #include "pgl_wren.h"
 #include "pgl_json.h"
+#include "memory.h"
 
 #endif

@@ -26,6 +26,16 @@ void Renderer_setCamera_9(WrenVM* vm){
   pgl3DSetCamera(vectors[0], vectors[1], vectors[2]);
 }
 
+void Renderer_getErrors_0(WrenVM* vm){
+  wrenSetSlotNewList(vm, 0);
+  GLenum err;
+  while((err = glGetError()) != GL_NO_ERROR)
+  {
+    wrenSetSlotString(vm, 1, pglGetGlErrorString(err));
+    wrenInsertInList(vm, 0, -1, 1);
+  }
+}
+
 static void Transform_allocate(WrenVM* vm){
   PGLTransform* t = pglTransformCreate();
   PGLTransform** handle = pgl_wren_new(vm, PGLTransform*);

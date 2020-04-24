@@ -36,6 +36,6 @@ typedef enum {
 
 void pglLog(PGLModule mod, PGLLogSeverity sev, const char *formatStr, ...);
 void pglLogLevel(PGLLogSeverity sev);
-void pglModLogLevel(PGLModule mod, PGLLogSeverity sev);
+void pglLogModLevel(PGLModule mod, PGLLogSeverity sev);
 
 #endif

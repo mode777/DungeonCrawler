@@ -1,0 +1,65 @@
+class Severity {
+  static Off { 0 }
+  static Error { 1 }
+  static Warning { 2 }
+  static Info { 3 }
+  static Debug { 4 }
+}
+
+class Module {
+  static Core { 1 }
+  static Graphics { 2 }
+  static Json { 3 }
+  static Wren { 4 }
+  static Platform { 5 }
+  static Renderer { 6 }
+  static Image { 7 }
+}
+
+class Application {  
+
+  static args { __args }
+
+  foreign static logLevel(severity)
+  foreign static logLevel(module, severity)
+  foreign static quit()
+
+  static onUpdate(callback){
+    __update = callback
+  }
+
+  static onInit(callback){
+    __init = callback
+  }
+
+  static onLoad(callback){
+    __load = callback
+  }
+
+  static update(delta) { 
+    if(__update != null){
+      __update.call(delta)
+    }    
+  }
+
+  static init(args){
+    __args = args
+    if(__init != null){
+      __init.call()
+    }
+  }
+
+  static load(){
+    if(__load != null){
+      __load.call()
+    }
+  }
+}
+
+class Window {
+  foreign static config(w,h,title)
+}
+
+class Keyboard {
+  foreign static isDown(key)
+}

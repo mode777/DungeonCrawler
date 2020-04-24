@@ -14,3 +14,18 @@ void Window_config_3(WrenVM* vm){
   win.title = wrenGetSlotString(vm, 3);
   pglWindowConfig(&win);
 }
+
+void Application_logLevel_1(WrenVM* vm){
+  int sev = (int)wrenGetSlotDouble(vm,1);
+  pglLogLevel(sev);
+}
+
+void Application_logLevel_2(WrenVM* vm){
+  int mod = (int)wrenGetSlotDouble(vm,1);
+  int sev = (int)wrenGetSlotDouble(vm,2);
+  pglLogModLevel(mod, sev);
+}
+
+void Application_quit_0(WrenVM* vm){
+  pglQuit();
+}

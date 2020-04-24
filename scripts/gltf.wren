@@ -1,25 +1,73 @@
-import "json" for JSON, JSONParser
-import "pgl" for Game, Keyboard, Camera, File, Image, Buffer, GeometryBuffer, Attribute, Primitive, Texture, Material, Mesh
+import "json" for Json
+import "io" for File
+import "image" for Image
+import "memory" for Buffer, BufferView, Float32Array, Accessor, DataType, ByteVecAccessor, UByteVecAccessor, ShortVecAccessor, UShortVecAccessor, IntVecAccessor, UIntVecAccessor, FloatVecAccessor, ByteAccessor, UByteAccessor, ShortAccessor, UShortAccessor, IntAccessor, UIntAccessor, FloatAccessor
+import "geometry" for GeometryData, AttributeType
+import "graphics" for Geometry, Mesh, Texture
 
-class GLTF {
+class Gltf {
+
+  static numComponents(str){
+    if(str == "VEC3") return 3
+    if(str == "VEC2") return 2
+    if(str == "VEC4") return 4
+    if(str == "SCALAR") return 1
+    if(str == "MAT3") return 9
+    if(str == "MAT2") return 4
+    if(str == "MAT4") return 16
+    return 1
+  }
+
+  static attributeType(str){
+    if(str == "POSITION") return AttributeType.Position
+    if(str == "COLOR_0") return AttributeType.Color
+    if(str == "NORMAL") return AttributeType.Normal
+    if(str == "TANGENT") return AttributeType.Tangent
+    if(str == "TEXCOORD_0") return AttributeType.Texcoord0
+    if(str == "TEXCOORD_1") return AttributeType.Texcoord1
+    return 0    
+  }
+
+  static accessorVecType(type){
+    if(type == DataType.Byte) return ByteVecAccessor
+    if(type == DataType.UByte) return UByteVecAccessor
+    if(type == DataType.Short) return ShortVecAccessor
+    if(type == DataType.UShort) return UShortVecAccessor
+    if(type == DataType.Int) return IntVecAccessor
+    if(type == DataType.UInt) return UIntVecAccessor
+    if(type == DataType.Float) return FloatVecAccessor
+  }
+
+  static accessorType(type){
+    if(type == DataType.Byte) return ByteAccessor
+    if(type == DataType.UByte) return UByteAccessor
+    if(type == DataType.Short) return ShortAccessor
+    if(type == DataType.UShort) return UShortAccessor
+    if(type == DataType.Int) return IntAccessor
+    if(type == DataType.UInt) return UIntAccessor
+    if(type == DataType.Float) return FloatAccessor
+  }
 
   meshes { _meshes }
+  accessors { _accessors }
+  textures { _textures }
+  materials { _materials }
 
-  construct load(filename){
-    var file = File.new(filename, "rb")
-    var content = file.read(file.length())
-    _json = JSON.parse(content)
+  construct fromFile(filename){
+    var file = File.open(filename, "rb")
+    var content = file.readToEnd()
+    file.close()
+    _json = Json.parse(content)
     
     getFolder(filename)
     loadImages()
     loadBuffers()
     loadTextures()
-    loadAttributeTypes()
     loadViews()
     loadAccessors()
-    loadMaterials()
     loadMeshes()
-
+    loadMaterials()
+    
     _json = null
   }
 
@@ -32,117 +80,118 @@ class GLTF {
   loadImages(){
     _images = []
     for (image in _json["images"]) {
-      _images.add(Image.new(_folder + "/" + image["uri"], 4))
+      _images.add(Image.fromFile(_folder + "/" + image["uri"]))
     }
   }
 
   loadBuffers(){
     _buffers = []
     for(buffer in _json["buffers"]){
-      _buffers.add(Buffer.new(_folder + "/" + buffer["uri"]))
+      _buffers.add(Buffer.fromFile(_folder + "/" + buffer["uri"]))
     }
   }
 
   loadTextures(){
     _textures = []
     for(texture in _json["textures"]){
-      _textures.add(Texture.new(_images[texture["source"]]))
+      _textures.add(GltfTexture.fromJson(_images[texture["source"]], texture))
     }
   }
 
   loadViews(){
     _views = []
-    var i = 0
     for(view in _json["bufferViews"]){
       var buffer = _buffers[view["buffer"]]
       var offset = view["byteOffset"]
       var size = view["byteLength"]
       var stride = view["stride"] || 0
-      _views.add(GeometryBuffer.new(buffer, offset, size, stride, _indices.contains(i)))
-      i = i+1
+      _views.add(BufferView.new(buffer, offset, size))
     }
-  }
-
-  attributeType(str){
-    if(str == "POSITION") return 1
-    if(str == "COLOR_0") return 2
-    if(str == "NORMAL") return 3
-    if(str == "TANGENT") return 4
-    if(str == "TEXCOORD_0") return 5
-    if(str == "TEXCOORD_1") return 6
-    return 0    
-  }
-
-  loadAttributeTypes(){
-    _indices = []
-    _attributeTypes = {}
-    for(mesh in _json["meshes"]){
-      for(prim in mesh["primitives"]){
-        for(key in prim["attributes"].keys){
-          _attributeTypes[prim["attributes"][key]] = attributeType(key)
-        }
-        // indices does not have an attribute type
-        var indexBuffer = _json["accessors"][prim["indices"]]["bufferView"]
-        _indices.add(indexBuffer)
-        _attributeTypes[prim["indices"]] = 0
-      }
-    }
-  }
-
-  numComponents(str){
-    if(str == "VEC3") return 3
-    if(str == "VEC2") return 2
-    if(str == "VEC4") return 4
-    if(str == "SCALAR") return 1
-    if(str == "MAT3") return 9
-    if(str == "MAT2") return 4
-    if(str == "MAT4") return 16
-    return 1
   }
 
   loadAccessors(){
     _accessors = []
-    var i = 0
-    for(accessor in _json["accessors"]){
-      var view = _views[accessor["bufferView"]]
-      var componentType = accessor["componentType"]
-      var count = accessor["count"]
-      var componentCount = numComponents(accessor["type"])
-      // TODO: Check offset property in spec
-      var offset = accessor["offset"] || 0
-      var normalized = accessor["normalized"] || false
-      var attributeType = _attributeTypes[i]
-      
-      //System.print("CompType: %(componentType), Count: %(count), CompCount: %(componentCount), AttrType: %(attributeType)")
-
-      _accessors.add(Attribute.new(view, attributeType, componentType, componentCount, offset, normalized, count))
-      i = i+1 
+    for(acc in _json["accessors"]){
+      loadAccessor(acc)
     }
   }
 
-  loadMaterials(){
-    _materials = []
-    for(material in _json["materials"]){
-      var diffuse = _textures[material["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
-      _materials.add(Material.new(diffuse))
+  loadAccessor(json){
+    var view = _views[json["bufferView"]]
+    var componentType = json["componentType"]
+    var numComponents = Gltf.numComponents(json["type"])
+    var accessor = null
+    // TODO: Get stride and offset
+    if(numComponents == 1){
+      accessor = Gltf.accessorType(componentType).fromBufferView(view, 0, 0)
+    } else {
+      accessor = Gltf.accessorVecType(componentType).fromBufferView(view, numComponents, 0, 0)
     }
+    _accessors.add(accessor)
   }
 
   loadMeshes(){
     _meshes = []
     for(mesh in _json["meshes"]){
-      var name = mesh["name"]
       var primitives = []
       for(prim in mesh["primitives"]){
         var index = _accessors[prim["indices"]]
-        var material = _materials[prim["material"]]
-        var attributes = []
+        //var material = _materials[prim["material"]]
+        var attributes = {}
         for(key in prim["attributes"].keys){
-          attributes.add(_accessors[prim["attributes"][key]])
+          var aType= Gltf.attributeType(key)
+          attributes[aType] =  _accessors[prim["attributes"][key]]
         }
-        primitives.add(Primitive.new(index, attributes, material))
+        primitives.add(GeometryData.new(attributes, index))
       }
-      _meshes.add(Mesh.new(name, primitives))
+      _meshes.add(GltfMesh.fromJson(primitives, mesh))
     }    
+  }
+
+  loadMaterials(){
+    _materials = []
+    for(material in _json["materials"]){
+      var mat = GltfMaterial.fromJson(_textures, material)
+      _materials.add(mat)
+    }
+  }
+
+}
+
+class GltfTexture {
+
+  source { _source }
+
+  construct fromJson(imageSrc, json) {
+    _source = imageSrc
+  }  
+
+  toGraphicsTexture(){
+    return Texture.fromImage(_source)
+  }
+}
+
+class GltfMesh {
+  
+  name { _name }
+  primitives { _primitives }
+  
+  construct fromJson(primitives, json){
+    _primitives = primitives
+    _name = json["name"]
+  }
+
+  toGraphicsMesh(){
+    var geometry = _primitives.map {|x| Geometry.new(x) }.toList
+    return Mesh.new(geometry)
+  }
+}
+
+class GltfMaterial {
+  
+  diffuse { _diffuse }
+  
+  construct fromJson(textures, json){
+    _diffuse = textures[json["pbrMetallicRoughness"]["baseColorTexture"]["index"]]
   }
 }

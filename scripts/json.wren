@@ -1,7 +1,7 @@
 
-class JSON {
+class Json {
   static parse(string) {
-    return JSONParser.new(string).parse()
+    return JsonParser.new(string).parse()
   }
 }
 
@@ -15,7 +15,7 @@ class Tokens {
   static Bool { 6 }
 }
 
-foreign class JSONParser {
+foreign class JsonParser {
     
   construct new(string){
 

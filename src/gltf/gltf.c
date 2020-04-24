@@ -62,7 +62,7 @@ static GLuint loadTexture(cgltf_texture* texture, const char * file){
     cgltf_combine_paths(textureFile, file, texture->image->uri);        
     
     // TODO: Samplers
-    PGLImage* img = pglLoadImage(textureFile, 4);
+    PGLImage* img = pglImageLoad(textureFile, 4);
     free(textureFile);
 
     glBindTexture(GL_TEXTURE_2D, glTexture);
@@ -70,7 +70,7 @@ static GLuint loadTexture(cgltf_texture* texture, const char * file){
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-    pglDestroyImage(img);
+    pglImageDestroy(img);
     texture->image->tag = (void*)glTexture;
   }
   else {
