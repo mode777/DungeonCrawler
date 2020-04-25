@@ -72,6 +72,13 @@ Augur.describe("Buffer") {
     b2.copyFrom(b1, 0, 4, 4)
     Assert.equal(b2.readUInt(4), 42)
   }
+
+  Augur.it("should create from bufferView"){
+    var b1 = Buffer.new(256)
+    var v1 = BufferView.new(b1)
+    var b2 = Buffer.fromBufferView(v1)
+    Assert.equal(b1.size, b2.size)
+  }
 }
 
 Augur.describe("BufferView") {

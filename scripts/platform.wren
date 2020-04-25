@@ -52,6 +52,7 @@ class Application {
   static load(){
     if(__load != null){
       __load.call()
+      System.gc()
     }
   }
 }

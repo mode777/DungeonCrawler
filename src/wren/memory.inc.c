@@ -45,6 +45,7 @@ static void Buffer_init_copy_3(WrenVM* vm){
   size_t size = (size_t)wrenGetSlotDouble(vm, 3);
 
   PGLBuffer* buffer = PGLBufferClone(sourceBuffer, offset, size);
+  *handle = buffer;
 }
 
 static void Buffer_copyFrom_4(WrenVM* vm){

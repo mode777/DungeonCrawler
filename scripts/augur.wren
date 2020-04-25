@@ -66,9 +66,13 @@ class Augur {
   }
 
   static run(){
-    for (suite in __suites) {
-      suite.run()
+    var res = __suites.reduce([0,0]) {|a,s| 
+      var r = s.run()
+      a[0] = a[0] + r[0]
+      a[1] = a[1] + r[1]
+      return a
     }
+    System.print("[AUGUR] Finishes running tests. %(res[0]) successful. %(res[1]) failed.")
   }
 }
 
@@ -100,13 +104,21 @@ class Suite {
 
   run(){
     System.print("[AUGUR] Running Suite <%(_name)>")
+    var totalSuc = 0
+    var totalFail = 0
     if(_beforeAll) { _beforeAll.call() }
     for (test in _tests) {
         if(_beforeEach) { _beforeEach.call() }
-        test.run(_name)
+        var success = test.run(_name)
+        if(success) { 
+          totalSuc = totalSuc+1 
+        } else { 
+          totalFail = totalFail+1 
+        }
         if(_afterEach) { _afterEach.call() }
     }
     if(_afterAll) { _afterAll.call() }
+    return [totalSuc, totalFail]
   }
 }
 
@@ -124,14 +136,17 @@ class TestFunc {
     var before = System.clock
     var error = fiber.try()
     var time = System.clock - before
-    var state 
+    var state
+    var success = false 
     if(error){
       state = "[ERROR: %(error)]"
     } else {
+      success = true
       state = "[SUCCESS]"
     }
 
     System.print("[AUGUR] %(state) %(suite) %(_desc) (%(time)s)")
+    return success
   }
 
 }

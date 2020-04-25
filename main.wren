@@ -1,5 +1,6 @@
 import "platform" for Application, Keyboard, Window, Severity
-import "graphics" for Transform, Camera, Renderer
+import "graphics" for Transform, Camera, Renderer, Geometry, Mesh
+import "geometry" for AttributeType, GeometryData
 import "gltf" for Gltf
 
 var mesh = null
@@ -8,18 +9,35 @@ var transform = null
 var camera = null
 
 Application.onInit {
-  Application.logLevel(Severity.Debug)
+  Application.logLevel(Severity.Warning)
   Window.config(800,480,"WrenGame!")
 }
 
 Application.onLoad {
-  System.print("LOAD!!!!")
   //var gltf = GLTF.load("./assets/desert/scene2.gltf")
   var gltf = Gltf.fromFile("./assets/blocks/stone1.gltf")
-  mesh = gltf.meshes[0].toGraphicsMesh()
-  texture = gltf.textures[0].toGraphicsTexture()
+  //mesh = gltf.meshes[0].toGraphicsMesh()
+  var merged = GeometryData.merge(gltf.meshes[0].primitives)
+  var geos = []
+  
   transform = Transform.new()
+  for (y in -4...4) {
+    for (x in -4...4) {
+      transform.reset()
+      transform.translate(x,-1,0.5*y)
+      var geo = GeometryData.clone(merged)
+      geo.transform(AttributeType.Position, transform)        
+      geos.add(geo)    
+    }      
+  }
+  merged = GeometryData.merge(geos)
+
+  mesh = Mesh.new([Geometry.new(merged)])
+  
+  texture = gltf.textures[0].toGraphicsTexture()
+  
   camera = Camera.new()
+  camera.move(-3,1,0)
 }
 
 Application.onUpdate {|delta|   
@@ -55,21 +73,22 @@ Application.onUpdate {|delta|
   }
 
   if(Keyboard.isDown("o")){
-    camera.move(0,-0.02,0)
-  } else if(Keyboard.isDown("l")) {
     camera.move(0,0.02,0)
+  } else if(Keyboard.isDown("l")) {
+    camera.move(0,-0.02,0)
   }
 
   Renderer.setCamera(camera)
 
-  for (y in -4...4) {
-    for (x in -4...4) {
-      //System.print("x: %(x), y: %(y)")
-      transform.reset()
-      transform.translate(x,-1,0.5*y)        
-      Renderer.setTransform(transform)
-      mesh.draw()    
-      Renderer.checkErrors()
-    }      
-  }  
+  mesh.draw()
+  // for (y in -4...4) {
+  //   for (x in -4...4) {
+  //     //System.print("x: %(x), y: %(y)")
+  //     transform.reset()
+  //     transform.translate(x,-1,0.5*y)        
+  //     Renderer.setTransform(transform)
+  //     mesh.draw()    
+  //     Renderer.checkErrors()
+  //   }      
+  // }  
 }

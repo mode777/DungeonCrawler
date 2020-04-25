@@ -72,6 +72,7 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("graphics.Renderer.setCameraCoords(_,_,_,_,_,_,_,_,_)", Renderer_setCamera_9);
   pgl_wren_bind_method("graphics.Renderer.getErrors()", Renderer_getErrors_0);
 
+
   //memory
   pgl_wren_bind_class("memory.Buffer", Buffer_allocate, Buffer_finalize);
   pgl_wren_bind_method("memory.Buffer.init_load(_)", Buffer_init_load_1);

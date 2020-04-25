@@ -28,26 +28,6 @@ class Gltf {
     return 0    
   }
 
-  static accessorVecType(type){
-    if(type == DataType.Byte) return ByteVecAccessor
-    if(type == DataType.UByte) return UByteVecAccessor
-    if(type == DataType.Short) return ShortVecAccessor
-    if(type == DataType.UShort) return UShortVecAccessor
-    if(type == DataType.Int) return IntVecAccessor
-    if(type == DataType.UInt) return UIntVecAccessor
-    if(type == DataType.Float) return FloatVecAccessor
-  }
-
-  static accessorType(type){
-    if(type == DataType.Byte) return ByteAccessor
-    if(type == DataType.UByte) return UByteAccessor
-    if(type == DataType.Short) return ShortAccessor
-    if(type == DataType.UShort) return UShortAccessor
-    if(type == DataType.Int) return IntAccessor
-    if(type == DataType.UInt) return UIntAccessor
-    if(type == DataType.Float) return FloatAccessor
-  }
-
   meshes { _meshes }
   accessors { _accessors }
   textures { _textures }
@@ -123,9 +103,9 @@ class Gltf {
     var accessor = null
     // TODO: Get stride and offset
     if(numComponents == 1){
-      accessor = Gltf.accessorType(componentType).fromBufferView(view, 0, 0)
+      accessor = Accessor.constructorForType(componentType).fromBufferView(view, 0, 0)
     } else {
-      accessor = Gltf.accessorVecType(componentType).fromBufferView(view, numComponents, 0, 0)
+      accessor = Accessor.constructorForVecType(componentType).fromBufferView(view, numComponents, 0, 0)
     }
     _accessors.add(accessor)
   }

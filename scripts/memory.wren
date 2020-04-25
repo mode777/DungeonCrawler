@@ -1,3 +1,34 @@
+class ListUtil {
+  static indexOf(list, item) {
+    for(i in 0...list.count){
+      if(list[i] == item){
+        return i
+      }
+    }
+    return -1
+  }
+
+  static mapUnique(list, fn){
+    var visited = []
+    var generated = []
+    var out = []
+    
+    for(el in visited){
+      var index = ListUtil.indexOf(visited,el)
+      if(index == -1){
+        var newItem = fn.call(el)
+        generated.add(newItem)
+        visited.add(el)
+        out.add(newItem)
+      } else {
+        out.add(generated[index])
+      }
+    }
+
+    return out
+  }
+}
+
 class BufferView {
 
   buffer { _buffer }
@@ -124,6 +155,28 @@ class DataType {
 }
 
 class Accessor {
+
+  static constructorForVecType(type){
+    if(type == DataType.Byte) return ByteVecAccessor
+    if(type == DataType.UByte) return UByteVecAccessor
+    if(type == DataType.Short) return ShortVecAccessor
+    if(type == DataType.UShort) return UShortVecAccessor
+    if(type == DataType.Int) return IntVecAccessor
+    if(type == DataType.UInt) return UIntVecAccessor
+    if(type == DataType.Float) return FloatVecAccessor
+  }
+
+  static constructorForType(type){
+    if(type == DataType.Byte) return ByteAccessor
+    if(type == DataType.UByte) return UByteAccessor
+    if(type == DataType.Short) return ShortAccessor
+    if(type == DataType.UShort) return UShortAccessor
+    if(type == DataType.Int) return IntAccessor
+    if(type == DataType.UInt) return UIntAccessor
+    if(type == DataType.Float) return FloatAccessor
+  }
+
+
   bufferView { _bufferView }
   count { _count }
   componentType { _componentType }
