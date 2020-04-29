@@ -29,6 +29,7 @@ class Application {
   }
 
   static onInit(callback){
+    Mouse.init()
     __init = callback
   }
 
@@ -63,4 +64,18 @@ class Window {
 
 class Keyboard {
   foreign static isDown(key)
+}
+
+class Mouse {
+
+  static init(){
+    __pos = [0,0]
+  }
+
+  static position {
+    Mouse.getPosition(__pos) 
+    return __pos
+  }
+
+  foreign static getPosition(vec2)
 }

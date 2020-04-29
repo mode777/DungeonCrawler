@@ -26,6 +26,11 @@ typedef struct {
   const char* title; 
 } PGLWindowConfig;
 
+typedef struct {
+  int x;
+  int y;
+} PGLMousePos;
+
 void pglPlatformInit();
 
 void pglWindowConfig(PGLWindowConfig* config);
@@ -36,6 +41,7 @@ void pglRun();
 void pglPresent();
 
 bool pglIsKeyDown(const char* key);
+PGLMousePos pglMousePosition();
 
 PGLFile pglFileOpen(const char* filename, const char* mode);
 long pglFileSize(PGLFile file);

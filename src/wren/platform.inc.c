@@ -29,3 +29,11 @@ void Application_logLevel_2(WrenVM* vm){
 void Application_quit_0(WrenVM* vm){
   pglQuit();
 }
+
+void Mouse_getPosition_1(WrenVM* vm){
+  PGLMousePos mouse = pglMousePosition();
+  wrenSetSlotDouble(vm, 0, (double)mouse.x);
+  wrenSetListElement(vm, 1, 0, 0);
+  wrenSetSlotDouble(vm, 0, (double)mouse.y);
+  wrenSetListElement(vm, 1, 1, 0);
+}

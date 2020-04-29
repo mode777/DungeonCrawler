@@ -171,6 +171,12 @@ bool pglIsKeyDown(const char* key){
   return state[code];
 }
 
+PGLMousePos pglMousePosition(){
+  PGLMousePos pos;
+  SDL_GetMouseState(&pos.x, &pos.y);
+  return pos;
+}
+
 void pglQuit(){
   quit = SDL_TRUE;
 }

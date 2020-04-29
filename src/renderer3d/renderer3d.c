@@ -16,6 +16,8 @@ float aspect = 1.78f;
 float fov = 45;
 float near = 0.1f;
 float far = 100.0f;
+float screen_width = 320;
+float screen_height = 240;
 
 GLuint shader;
 int uniforms[PGL_UNI3D_MAX];
@@ -44,12 +46,43 @@ void pgl3DSetCamera(float* eye, float* target, float* up) {
   glUniformMatrix4fv(uniforms[PGL_UNI3D_VIEW], 1, GL_FALSE, (float *)view);
 }
 
+void pglWorldToScreen(float* world, float* out){
+  mat4 pv;
+  vec4 screen = { 0,0,screen_width,screen_height };
+
+  glm_mat4_mul(projection, view, pv);
+  glm_project(world, pv, screen, out);
+  out[1] = screen_height - out[1];
+}
+
+void pglScreenToWorld(float* screen, float* out){
+  mat4 pv;
+  mat4 pv_inv;
+  vec4 vp = { 0,0,screen_width,screen_height };
+
+  glm_mat4_mul(projection, view, pv);
+  screen[1] = screen_height - screen[1];
+  glm_unproject(screen, pv, vp, out);
+
+  // // TODO: Fix screen space 
+  // screen[0] = ((screen[0] / screen_width)) * 2 - 1;
+  // screen[1] = (((screen_height - screen[1]) / screen_height) * 2) - 1;
+  // glm_vec4(screen, 1, homo); 
+  // //glm_mat4_inv_fast(pv, pv_inv);
+  // glm_mat4_inv(pv, pv_inv);
+  // glm_mat4_mulv(pv_inv, homo, homo);
+  // glm_vec3(homo, out);
+}
+
 static void resetModelTransform()
 {
   glUniformMatrix4fv(uniforms[PGL_UNI3D_MODEL], 1, GL_FALSE, (float *)ident);
 }
 
 void pgl3DSetViewport(float width, float height){
+  screen_width = width;
+  screen_height = height;
+  
   glViewport(0,0, (GLsizei)width, (GLsizei)height);
   aspect = width / height;
   updateProjection();

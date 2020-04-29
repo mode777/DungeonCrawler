@@ -1,16 +1,18 @@
-import "platform" for Application, Keyboard, Window, Severity
+import "platform" for Application, Keyboard, Window, Severity, Mouse
 import "graphics" for Transform, Camera, Renderer, Geometry, Mesh
 import "geometry" for AttributeType, GeometryData
 import "gltf" for Gltf
 
 var mesh = null
+var single = null
+var singleTransform = null
 var texture = null
 var transform = null
 var camera = null
 
 Application.onInit {
   Application.logLevel(Severity.Warning)
-  Window.config(800,480,"WrenGame!")
+  Window.config(640,400,"WrenGame!")
 }
 
 Application.onLoad {
@@ -18,6 +20,10 @@ Application.onLoad {
   var gltf = Gltf.fromFile("./assets/blocks/stone1.gltf")
   //mesh = gltf.meshes[0].toGraphicsMesh()
   var merged = GeometryData.merge(gltf.meshes[0].primitives)
+  
+  single = Mesh.new([Geometry.new(merged)])
+  singleTransform = Transform.new() 
+  
   var geos = []
   
   transform = Transform.new()
@@ -79,6 +85,18 @@ Application.onUpdate {|delta|
   }
 
   Renderer.setCamera(camera)
+
+  var mouse = Mouse.position
+  var v3 = [mouse[0],mouse[1], -0.01]
+  //var v3 = [0,0,0]
+  //Renderer.worldToScreen(v3)
+  Renderer.screenToWorld(v3)
+  System.print(v3)
+  singleTransform.translate(v3[0], v3[1], v3[2])
+  Renderer.setTransform(singleTransform)
+  single.draw()
+  singleTransform.reset()
+  Renderer.setTransform(singleTransform)
 
   mesh.draw()
   // for (y in -4...4) {

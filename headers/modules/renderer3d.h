@@ -34,4 +34,7 @@ void pglTransformDelete(PGLTransform* transform);
 void pglAttributeEnable(PGLAttribute2* attr);
 void pglIndicesDraw(PGLVertexIndices* idx);
 
+void pglWorldToScreen(float* world, float* out);
+void pglScreenToWorld(float* screen, float* out);
+
 #endif

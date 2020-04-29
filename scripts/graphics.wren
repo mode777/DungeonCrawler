@@ -79,6 +79,8 @@ class Renderer {
       Fiber.abort(errors.join(", "))
     }
   }
+  foreign static worldToScreen(vec3)
+  foreign static screenToWorld(vec3)
 }
 
 class Geometry { 
@@ -146,7 +148,7 @@ class Camera {
 
   construct new(){
     _eye = [0,0,0]
-    _target = [1,0,0]
+    _target = [100,0,0]
     _up = [0,1,0]
     _rotate = [0,0,0]
     _movement = [0,0,0]

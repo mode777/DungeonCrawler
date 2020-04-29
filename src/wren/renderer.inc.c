@@ -36,6 +36,44 @@ void Renderer_getErrors_0(WrenVM* vm){
   }
 }
 
+static void Renderer_WorldToScreen_1(WrenVM* vm){
+  int vectors = wrenGetListCount(vm, 1) / 3;
+  for (size_t i = 0; i < vectors; i++)
+  {
+    vec3 v;
+    for (size_t j = 0; j < 3; j++)
+    {
+      wrenGetListElement(vm, 1, i*3+j, 0);
+      v[j] = (float)wrenGetSlotDouble(vm, 0);
+    }
+    pglWorldToScreen(v, v);
+    for (size_t j = 0; j < 3; j++)
+    {
+      wrenSetSlotDouble(vm, 0, v[j]);
+      wrenSetListElement(vm, 1, i*3+j, 0);
+    }
+  }  
+}
+
+static void Renderer_ScreenToWorld_1(WrenVM* vm){
+  int vectors = wrenGetListCount(vm, 1) / 3;
+  for (size_t i = 0; i < vectors; i++)
+  {
+    vec3 v;
+    for (size_t j = 0; j < 3; j++)
+    {
+      wrenGetListElement(vm, 1, i*3+j, 0);
+      v[j] = (float)wrenGetSlotDouble(vm, 0);
+    }
+    pglScreenToWorld(v, v);
+    for (size_t j = 0; j < 3; j++)
+    {
+      wrenSetSlotDouble(vm, 0, v[j]);
+      wrenSetListElement(vm, 1, i*3+j, 0);
+    }
+  }  
+}
+
 static void Transform_allocate(WrenVM* vm){
   PGLTransform* t = pglTransformCreate();
   PGLTransform** handle = pgl_wren_new(vm, PGLTransform*);

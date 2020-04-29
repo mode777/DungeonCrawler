@@ -21,6 +21,7 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("platform.Application.logLevel(_)", Application_logLevel_1);
   pgl_wren_bind_method("platform.Application.logLevel(_,_)", Application_logLevel_2);
   pgl_wren_bind_method("platform.Application.quit()", Application_quit_0);
+  pgl_wren_bind_method("platform.Mouse.getPosition(_)", Mouse_getPosition_1);
 
   //io
   pgl_wren_bind_class("io.File", File_allocate, File_finalize);
@@ -71,7 +72,8 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("graphics.Renderer.setTransform(_)", Renderer_setTransform_1);
   pgl_wren_bind_method("graphics.Renderer.setCameraCoords(_,_,_,_,_,_,_,_,_)", Renderer_setCamera_9);
   pgl_wren_bind_method("graphics.Renderer.getErrors()", Renderer_getErrors_0);
-
+  pgl_wren_bind_method("graphics.Renderer.worldToScreen(_)", Renderer_WorldToScreen_1);
+  pgl_wren_bind_method("graphics.Renderer.screenToWorld(_)", Renderer_ScreenToWorld_1);
 
   //memory
   pgl_wren_bind_class("memory.Buffer", Buffer_allocate, Buffer_finalize);
