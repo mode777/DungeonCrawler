@@ -23,6 +23,7 @@ const static PGLWindowConfig defaults = {
 };
 
 static PGLWindowConfig windowConfig;
+static PGLWindow* activeWindow;
 
 inline void pglDestroyWindow(PGLWindow* win){
 	SDL_DestroyWindow(win->handle);
@@ -88,6 +89,7 @@ PGLWindow* pglCreateWindow() {
   initEgl(systemInfo.info.win.window);
   #endif
 
+  activeWindow = pglWindow;
   return pglWindow;
 }
 
@@ -171,10 +173,14 @@ bool pglIsKeyDown(const char* key){
   return state[code];
 }
 
-PGLMousePos pglMousePosition(){
+PGLMousePos pglGetMousePosition(){
   PGLMousePos pos;
   SDL_GetMouseState(&pos.x, &pos.y);
   return pos;
+}
+
+void pglSetMousePosition(int x, int y){
+  SDL_WarpMouseInWindow(activeWindow->handle, x,y);
 }
 
 void pglQuit(){

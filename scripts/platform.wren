@@ -1,3 +1,5 @@
+import "graphics" for Shader, Renderer, Colors
+
 class Severity {
   static Off { 0 }
   static Error { 1 }
@@ -45,12 +47,14 @@ class Application {
 
   static init(args){
     __args = args
+    Colors.init()
     if(__init != null){
       __init.call()
     }
   }
 
   static load(){
+    Renderer.setShader(Shader.default3d)
     if(__load != null){
       __load.call()
       System.gc()
@@ -78,4 +82,5 @@ class Mouse {
   }
 
   foreign static getPosition(vec2)
+  foreign static setPosition(x,y)
 }

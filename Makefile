@@ -12,7 +12,7 @@ main: INCLUDEFLAGS= $(INCLUDES_COMMON) $(INCLUDES_RPI) $(INCLUDES_HEADERS)
 main.exe: INCLUDEFLAGS= $(INCLUDES_COMMON) $(INCLUDES_WIN32) $(INCLUDES_HEADERS) 
 main.wasm: INCLUDEFLAGS= $(INCLUDES_COMMON) $(INCLUDES_WEB) $(INCLUDES_HEADERS) 
 
-VPATH = ./src ./src/platform ./src/image ./src/gl ./src/gltf ./src/renderer3d ./src/wren ./wren/src/vm ./src/json ./src/memory
+VPATH = ./src ./src/platform ./src/image ./src/gl ./src/gltf ./src/renderer3d ./src/wren ./wren/src/vm ./src/json ./src/memory ./src/math
 
 CORE= common.o
 MOD_PLATFORM= platform.o egl.o file.o
@@ -23,8 +23,9 @@ MOD_RENDERER3D= renderer3d.o transform.o
 MOD_WREN= wren.o api.o wren_compiler.o wren_core.o wren_debug.o wren_primitive.o wren_utils.o wren_value.o wren_vm.o
 MOD_JSON= json.o
 MOD_MEMORY= memory.o
+MOD_MATH = noise.o
 
-OBJECTS= main.o $(CORE) $(MOD_PLATFORM) $(MOD_GL) $(MOD_IMAGE) $(MOD_RENDERER3D) $(MOD_WREN) $(MOD_JSON) $(MOD_MEMORY)
+OBJECTS= main.o $(CORE) $(MOD_PLATFORM) $(MOD_GL) $(MOD_IMAGE) $(MOD_RENDERER3D) $(MOD_WREN) $(MOD_JSON) $(MOD_MEMORY) $(MOD_MATH)
 OBJECTS_WASM = $(OBJECTS:.o=.bc)
 
 # main: main.o pgl.so

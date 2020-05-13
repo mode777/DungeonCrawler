@@ -2,8 +2,7 @@ import "augur" for Augur, Assert
 import "image" for Image
 import "geometry" for AttributeType, GeometryData
 import "memory" for DataType, Buffer, BufferView, FloatVecAccessor, UShortAccessor
-
-import "graphics" for Geometry, Texture, Attribute, GraphicsBuffer, VertexIndices, Renderer, Mesh
+import "graphics" for Geometry, Texture, Attribute, GraphicsBuffer, VertexIndices, Renderer, Mesh, Shader, UniformType, PerspectiveCamera
 
 Augur.describe("Texture") {
 
@@ -19,13 +18,16 @@ Augur.describe("Texture") {
 }
 
 Augur.describe("GraphicsBuffer") {
+  
   Augur.it("constructs from BufferView") {
     var bv = BufferView.new(Buffer.new(1024))
     var gb = GraphicsBuffer.forVertices(bv)
   }
+
 }
 
 Augur.describe("Attribute") {
+  
   Augur.it("constructs") {
     var bv = BufferView.new(Buffer.new(1024))
     var gb = GraphicsBuffer.forVertices(bv)
@@ -34,16 +36,10 @@ Augur.describe("Attribute") {
     Renderer.checkErrors()
   }
 
-  Augur.it("enables"){
-  	var bv = BufferView.new(Buffer.new(1024))
-    var gb = GraphicsBuffer.forVertices(bv)
-    var pos = Attribute.new(gb, AttributeType.Normal, 3, DataType.Float, false, 0, 0)
-    pos.enable()
-    Renderer.checkErrors()
-  }
 }
 
 Augur.describe("VertexIndices") {
+  
   Augur.it("constructs"){
     var bv = BufferView.new(Buffer.new(1024))
     var gb = GraphicsBuffer.forIndices(bv)
@@ -51,13 +47,6 @@ Augur.describe("VertexIndices") {
     Renderer.checkErrors()
   }
 
-  Augur.it("draws"){
-    var bv = BufferView.new(Buffer.new(1024))
-    var gb = GraphicsBuffer.forIndices(bv)
-    var idx = VertexIndices.new(gb, 512, DataType.UShort)
-    idx.draw()
-    Renderer.checkErrors()
-  }
 }
 
 
@@ -66,6 +55,23 @@ var createGD = Fn.new {
     AttributeType.Position: FloatVecAccessor.new(4, 3),
     AttributeType.Texcoord1: FloatVecAccessor.new(4, 2)
   }, UShortAccessor.new(6))
+}
+
+var createShader = Fn.new {
+
+  var mapping = {
+    "attributes": {
+      "vPosition": AttributeType.Texcoord0,
+      "vTexcoord": AttributeType.Position
+    },
+    "uniforms": {
+      "uProjection": UniformType.Projection,
+      "uModel": UniformType.Model,
+      "uView": UniformType.View,
+      "uTexture": UniformType.Texture0
+    }
+  }
+  return Shader.fromFiles("./shaders/3d.vertex.glsl","./shaders/3d.fragment.glsl", mapping)
 }
 
 Augur.describe("Geometry") {
@@ -77,11 +83,14 @@ Augur.describe("Geometry") {
   }
 
   Augur.it("draws"){
+    var s = createShader.call()
+    Renderer.setShader(s)
     var gd = createGD.call()
     var g = Geometry.new(gd)
     g.draw()
     Renderer.checkErrors()
   }
+  
 }
 
 Augur.describe("Mesh"){
@@ -98,10 +107,18 @@ Augur.describe("Mesh"){
   }
 }
 
+Augur.describe("Shader"){
 
+  Augur.it("constructs from files"){
+    var s = createShader.call()
+    Renderer.setShader(s)
+    Renderer.checkErrors()
+  }
 
-// Augur.describe("Mesh") {
-//   Augur.it("should create from geometry data"){
-//     var mesh = Mesh.create(geoData, material)
-//   }
-// }
+}
+
+Augur.describe("PerspectiveCamera") {
+  Augur.it("creates"){
+    var c = PerspectiveCamera.new()
+  }
+}

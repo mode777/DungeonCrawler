@@ -1,7 +1,8 @@
 
 import "augur" for Augur, Assert
 import "memory" for FloatVecAccessor, UShortAccessor
-import "geometry" for GeometryData, AttributeType, Transform
+import "geometry" for GeometryData, AttributeType
+import "math" for Mat4
 
 Augur.describe("GeometryData") {
 
@@ -40,7 +41,7 @@ Augur.describe("GeometryData") {
 
   Augur.it("transforms"){
     var gd = create.call()
-    var t = Transform.new()
+    var t = Mat4.new()
     t.translate(1,2,3)
     gd.transform(AttributeType.Position, t)
     for(v in gd[AttributeType.Position]){

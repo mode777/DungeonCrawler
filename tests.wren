@@ -6,6 +6,7 @@ import "./tests/image.spec"
 import "./tests/geometry.spec"
 import "./tests/graphics.spec"
 import "./tests/gltf.spec"
+import "./tests/math.spec"
 
 Application.onLoad {
   //Application.logLevel(Severity.Debug)

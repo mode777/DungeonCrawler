@@ -183,6 +183,9 @@ class Accessor {
   numComponents { _numComponents }
   stride { _stride }
   offset { _offset }
+  normalized { _normalized }
+  normalized=(v) { _normalized = v }
+  
 
   construct fromBufferView(bufferView, numComponents, stride, offset, dataType) {
     init(bufferView, dataType, numComponents, stride, offset)
@@ -195,6 +198,7 @@ class Accessor {
   }
 
   init(bufferView, componentType, numComponents, stride, offset){
+    _normalized = false
     _bufferView = bufferView
     _componentType = componentType
     _numComponents = numComponents

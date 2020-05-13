@@ -1,6 +1,7 @@
 #include <modules/gl.h>
 
 const char* pglGetGlErrorString(GLenum const err){
+  
   switch (err)
   {
     // opengl 2 errors (8)

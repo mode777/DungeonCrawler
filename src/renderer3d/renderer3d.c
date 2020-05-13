@@ -1,141 +1,39 @@
 #include <modules/renderer3d.h>
 
-mat4 view;
-mat4 projection;
-mat4 ident;
+static vec4 viewport = {0,0,0,0};
 
-static GLuint texture = 0;
-static GLuint el_buffer = 0;
+static PGLProgram* program;
+static GLenum activeTexture = GL_TEXTURE0;
 
-vec3 eye = {0, 0, 0};
-vec3 target = {1, 0, 0};
-vec3 up = {0, 1, 0};
-
-//projection
-float aspect = 1.78f;
-float fov = 45;
-float near = 0.1f;
-float far = 100.0f;
-float screen_width = 320;
-float screen_height = 240;
-
-GLuint shader;
-int uniforms[PGL_UNI3D_MAX];
-int attributeLocations[PGL_ATTR_MAX];
-
-static void vec3_print(vec3 vec){
-  printf("%f, %f, %f\n", vec[0], vec[1], vec[2]);
+void pgl3DSetProgram(PGLProgram* p){
+  program = p;
+  glUseProgram(p->program);
 }
 
-static void updateProjection()
-{
-  glm_perspective(glm_rad(fov), aspect, near, far, projection);
-  //glm_ortho(-10*aspect, 10, -10, 10, near, far, projection);
-  glUniformMatrix4fv(uniforms[PGL_UNI3D_PROJECTION], 1, GL_FALSE, (float *)projection);
+void pgl3DSetViewport(float x, float y, float width, float height){
+  viewport[0] = x;
+  viewport[1] = y;
+  viewport[2] = width;
+  viewport[3] = height;
+  glViewport((GLint)x, (GLint)y, (GLsizei)width, (GLsizei)height);
 }
 
-static void updateView()
-{
-  glm_lookat(eye, target, up, view);
-  //glm_mat4_identity(view);
-  glUniformMatrix4fv(uniforms[PGL_UNI3D_VIEW], 1, GL_FALSE, (float *)view);
+float* pgl3DGetViewport(){
+  return &viewport[0];
 }
 
-void pgl3DSetCamera(float* eye, float* target, float* up) {
-  glm_lookat(eye, target, up, view);
-  glUniformMatrix4fv(uniforms[PGL_UNI3D_VIEW], 1, GL_FALSE, (float *)view);
-}
+#define CHECKPROG if(program == NULL) return
 
-void pglWorldToScreen(float* world, float* out){
-  mat4 pv;
-  vec4 screen = { 0,0,screen_width,screen_height };
+void pglAttributeEnable(PGLAttribute* a){
+  CHECKPROG;
 
-  glm_mat4_mul(projection, view, pv);
-  glm_project(world, pv, screen, out);
-  out[1] = screen_height - out[1];
-}
-
-void pglScreenToWorld(float* screen, float* out){
-  mat4 pv;
-  mat4 pv_inv;
-  vec4 vp = { 0,0,screen_width,screen_height };
-
-  glm_mat4_mul(projection, view, pv);
-  screen[1] = screen_height - screen[1];
-  glm_unproject(screen, pv, vp, out);
-
-  // // TODO: Fix screen space 
-  // screen[0] = ((screen[0] / screen_width)) * 2 - 1;
-  // screen[1] = (((screen_height - screen[1]) / screen_height) * 2) - 1;
-  // glm_vec4(screen, 1, homo); 
-  // //glm_mat4_inv_fast(pv, pv_inv);
-  // glm_mat4_inv(pv, pv_inv);
-  // glm_mat4_mulv(pv_inv, homo, homo);
-  // glm_vec3(homo, out);
-}
-
-static void resetModelTransform()
-{
-  glUniformMatrix4fv(uniforms[PGL_UNI3D_MODEL], 1, GL_FALSE, (float *)ident);
-}
-
-void pgl3DSetViewport(float width, float height){
-  screen_width = width;
-  screen_height = height;
-  
-  glViewport(0,0, (GLsizei)width, (GLsizei)height);
-  aspect = width / height;
-  updateProjection();
-}
-
-// void pgl3DOrbitCamera(float rad, float gamma)
-// {
-//   eye[0] = sin(gamma) * rad;
-//   eye[2] = cos(gamma) * rad;
-//   updateView();
-// }
-
-void pgl3DSetModelTransform(PGLTransform* transform){
-  glUniformMatrix4fv(uniforms[PGL_UNI3D_MODEL], 1, GL_FALSE, pglTransformMatrix(transform));
-}
-
-void pgl3DInit()
-{
-  for(PGLAttributeType i = 0; i < PGL_ATTR_MAX; i++){
-    attributeLocations[i] = -1;
-  }
-
-  for (PGLUniform3D i = 0; i < PGL_UNI3D_MAX; i++)
-  {
-    uniforms[i] = -1;
-  }
-
-  GLuint prog = pglLoadProgramFile("./shaders/3d.vertex.glsl", "./shaders/3d.fragment.glsl");
-  assert(prog != 0);
-
-  attributeLocations[PGL_ATTR_POSITION] = glGetAttribLocation(prog, "vPosition");
-  attributeLocations[PGL_ATTR_COLOR] = glGetAttribLocation(prog, "vColor");
-  attributeLocations[PGL_ATTR_TEXCOORD0] = glGetAttribLocation(prog, "vTexcoord");
-
-  uniforms[PGL_UNI3D_TEXTURE0] = glGetUniformLocation(prog, "uTexture");
-  uniforms[PGL_UNI3D_PROJECTION] = glGetUniformLocation(prog, "uProjection");
-  uniforms[PGL_UNI3D_MODEL] = glGetUniformLocation(prog, "uModel");
-  uniforms[PGL_UNI3D_VIEW] = glGetUniformLocation(prog, "uView");
-
-  glUseProgram(prog);
-
-  glm_mat4_identity(ident);
-  resetModelTransform();
-  updateView();
-  updateProjection();
-}
-
-void pglAttributeEnable(PGLAttribute2* a){
-  PGLAttribute2 attr = *a;
-  int location = attributeLocations[attr.type];
+  PGLAttribute attr = *a;
+  int location = program->attributes[attr.type];
     
-  if(location == -1)
+  if(location == -1){
+    pglLog(PGL_MODULE_RENDERER, PGL_LOG_DEBUG, "Unknown attribute %i", attr.type);
     return;
+  }
 
   glBindBuffer(GL_ARRAY_BUFFER, attr.buffer);
 
@@ -149,36 +47,50 @@ void pglIndicesDraw(PGLVertexIndices* i) {
   glDrawElements(GL_TRIANGLES, idx.count, idx.componentType, 0);
 }
 
-void pgl3DDrawPrimitive(PGLPrimitive *prim){
-  for (size_t i = 0; i < prim->attributeCount; i++)
-  {
+void pglSetUniformMat4(int type, float* mat){
+  CHECKPROG;
 
-    PGLAttribute attr = prim->attributes[i];
-    int location = attributeLocations[attr.attributeType];
-    
-    if(location == -1)
-      continue;
+  int location = program->uniforms[type];
 
-    //printf("activating attribute type: %i, buffer: %i, location: %i, numComp: %i, compType: %i\n", attr.attributeType, attr.buffer->handle, location, attr.numComponents, attr.componentType);
-    glBindBuffer(GL_ARRAY_BUFFER, attr.buffer->handle);
-
-    //glVertexAttribPointer(location, attr.numComponents, GL_FLOAT, false, 0, 0);
-    glVertexAttribPointer(location, attr.numComponents, attr.componentType, attr.normalized, attr.buffer->stride, (void*)attr.offset);
-    glEnableVertexAttribArray(location);
+  if(location == -1){
+    pglLog(PGL_MODULE_RENDERER, PGL_LOG_DEBUG, "Unknown uniform %i", type);
+    return;
   }
 
-  GLuint ctext = prim->material.diffuse->handle; 
-  if(texture != ctext){
-    glBindTexture(GL_TEXTURE_2D, ctext);
-    texture = ctext;
-  }
-
-  GLuint cel_buffer = prim->index.buffer->handle;
-  if(el_buffer != cel_buffer){
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cel_buffer);
-  	el_buffer = cel_buffer;
-  }
-  //pglCheckGlError();
-  glDrawElements(GL_TRIANGLES, prim->index.count, prim->index.componentType, 0);  
-  pglCheckGlError();
+  glUniformMatrix4fv(location, 1, GL_FALSE, mat);
 }
+
+void pglSetUniformVec3(int type, float* v3){
+  CHECKPROG;
+
+  int location = program->uniforms[type];
+
+  if(location == -1){
+    pglLog(PGL_MODULE_RENDERER, PGL_LOG_DEBUG, "Unknown uniform %i", type);
+    return;
+  }
+  glUniform3fv(location, 1, v3);
+}
+
+void pglSetUniformi(int type, int i){
+  CHECKPROG;
+
+  int location = program->uniforms[type];
+
+  if(location == -1){
+    pglLog(PGL_MODULE_RENDERER, PGL_LOG_DEBUG, "Unknown uniform %i", type);
+    return;
+  }
+
+  glUniform1i(location, i);
+}
+
+void pglSetTextureUnit(int unit, GLuint texture){
+  GLenum eUnit = GL_TEXTURE0 + unit;
+  if(unit != activeTexture){
+    glActiveTexture(eUnit);
+  }
+  glBindTexture(GL_TEXTURE_2D, texture);
+}
+
+#undef CHECKPROG

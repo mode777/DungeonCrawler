@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
   pglCallWrenInit();
 
   window = pglCreateWindow();
-  pgl3DInit();
-  pgl3DSetViewport(window->width, window->height);
+  //pgl3DInit();
+  pgl3DSetViewport(0,0, window->width, window->height);
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);

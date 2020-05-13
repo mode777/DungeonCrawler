@@ -1,6 +1,6 @@
 import "augur" for Augur, Assert
 import "image" for Image
-import "vector" for Vec4
+import "math" for Vec4
 
 Augur.describe("Image") {
 

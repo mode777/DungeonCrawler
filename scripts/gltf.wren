@@ -59,6 +59,8 @@ class Gltf {
 
   loadImages(){
     _images = []
+    if(_json["images"] == null) return
+
     for (image in _json["images"]) {
       _images.add(Image.fromFile(_folder + "/" + image["uri"]))
     }
@@ -73,6 +75,9 @@ class Gltf {
 
   loadTextures(){
     _textures = []
+
+    if(_json["textures"] == null) return
+
     for(texture in _json["textures"]){
       _textures.add(GltfTexture.fromJson(_images[texture["source"]], texture))
     }
@@ -130,6 +135,9 @@ class Gltf {
 
   loadMaterials(){
     _materials = []
+
+  if(_json["materials"] == null) return
+
     for(material in _json["materials"]){
       var mat = GltfMaterial.fromJson(_textures, material)
       _materials.add(mat)
@@ -161,10 +169,10 @@ class GltfMesh {
     _name = json["name"]
   }
 
-  toGraphicsMesh(){
-    var geometry = _primitives.map {|x| Geometry.new(x) }.toList
-    return Mesh.new(geometry)
-  }
+  // toGraphicsMesh(){
+  //   var geometry = _primitives.map {|x| Geometry.new(x) }.toList
+  //   return Mesh.new(geometry)
+  // }
 }
 
 class GltfMaterial {

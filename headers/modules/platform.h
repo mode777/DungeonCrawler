@@ -41,7 +41,8 @@ void pglRun();
 void pglPresent();
 
 bool pglIsKeyDown(const char* key);
-PGLMousePos pglMousePosition();
+PGLMousePos pglGetMousePosition();
+void pglSetMousePosition(int x, int y);
 
 PGLFile pglFileOpen(const char* filename, const char* mode);
 long pglFileSize(PGLFile file);

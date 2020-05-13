@@ -10,6 +10,33 @@ class AttributeType {
   static Texcoord1 { 6 }
 }
 
+class GeometryWriter {
+
+  vertexOffset { _vertexOffset }
+  indexOffset { _indexOffset }
+
+  construct new(accessors, indices) {
+    _accessors = accessors
+    _numAccessors = accessors.count
+    _indices = indices
+    _vertexOffset = 0
+    _indexOffset = 0
+  }
+
+  vertex(vs){
+    for(i in 0..._numAccessors){
+      _accessors[i][_vertexOffset] = vs[i]
+    }
+    _vertexOffset = _vertexOffset +1
+  }
+  tri(a,b,c){
+    _indices[_indexOffset] = a
+    _indices[_indexOffset+1] = b
+    _indices[_indexOffset+2] = c
+    _indexOffset = _indexOffset + 3
+  }
+}
+
 class GeometryData {
   
   static merge(seq){
@@ -135,22 +162,8 @@ class GeometryData {
     var v3
     for(i in 0...a.count){
       v3 = a[i]
-      t.transformVectors(v3)
+      t.mulVec3(v3)
       a[i] = v3
     }
   }
-}
-
-foreign class Transform {
-  construct new(){}
-  construct copy(transform){
-    load(transform)
-  }
-  foreign translate(x, y, z)
-  foreign rotate(x, y, z)
-  foreign scale(x, y, z)
-  foreign reset()
-  foreign load(transform)
-  foreign apply(transform)
-  foreign transformVectors(vecs)
 }

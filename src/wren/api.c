@@ -5,6 +5,7 @@ static void pgl_wren_runtime_error(WrenVM* vm, const char * error){
   wrenAbortFiber(vm, 0);
 }
 
+#include "math.inc.c"
 #include "platform.inc.c"
 #include "io.inc.c"
 #include "renderer.inc.c"
@@ -22,6 +23,7 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("platform.Application.logLevel(_,_)", Application_logLevel_2);
   pgl_wren_bind_method("platform.Application.quit()", Application_quit_0);
   pgl_wren_bind_method("platform.Mouse.getPosition(_)", Mouse_getPosition_1);
+  pgl_wren_bind_method("platform.Mouse.setPosition(_,_)", Mouse_setPosition_2);
 
   //io
   pgl_wren_bind_class("io.File", File_allocate, File_finalize);
@@ -49,15 +51,25 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("image.Image.getWidth()", Image_getWidth_0);
   pgl_wren_bind_method("image.Image.getHeight()", Image_getHeight_0);
 
-  //geometry
-  pgl_wren_bind_class("geometry.Transform", Transform_allocate, Transform_finalize);
-  pgl_wren_bind_method("geometry.Transform.translate(_,_,_)", Transform_translate_3);
-  pgl_wren_bind_method("geometry.Transform.rotate(_,_,_)", Transform_rotate_3);
-  pgl_wren_bind_method("geometry.Transform.scale(_,_,_)", Transform_scale_3);
-  pgl_wren_bind_method("geometry.Transform.reset()", Transform_reset_0);
-  pgl_wren_bind_method("geometry.Transform.load(_)", Transform_load_1);
-  pgl_wren_bind_method("geometry.Transform.apply(_)", Transform_apply_1);
-  pgl_wren_bind_method("geometry.Transform.transformVectors(_)", Transform_transformVectors_1);
+  //math
+  pgl_wren_bind_class("math.Mat4", Mat4_allocate, Mat4_finalize);
+  pgl_wren_bind_method("math.Mat4.identity()", Mat4_identity_0);
+  pgl_wren_bind_method("math.Mat4.translate(_,_,_)", Mat4_translate_3);
+  pgl_wren_bind_method("math.Mat4.rotateX(_)", Mat4_rotateX_1);
+  pgl_wren_bind_method("math.Mat4.rotateY(_)", Mat4_rotateY_1);
+  pgl_wren_bind_method("math.Mat4.rotateZ(_)", Mat4_rotateZ_1);
+  pgl_wren_bind_method("math.Mat4.scale(_,_,_)", Mat4_scale_3);
+  pgl_wren_bind_method("math.Mat4.copy(_)", Mat4_copy_1);
+  pgl_wren_bind_method("math.Mat4.mul(_)", Mat4_mul_1);
+  pgl_wren_bind_method("math.Mat4.mulVec3(_)", Mat4_mulVec_1);
+  pgl_wren_bind_method("math.Mat4.project(_)", Mat4_project_1);
+  pgl_wren_bind_method("math.Mat4.unproject(_)", Mat4_unproject_1);
+  pgl_wren_bind_method("math.Mat4.perspective(_,_,_)", Mat4_perspective_3);
+  pgl_wren_bind_method("math.Mat4.lookAt(_,_,_)", Mat4_lookAt_3);
+  pgl_wren_bind_method("math.Mat4.transpose()", Mat4_transpose_0);
+  pgl_wren_bind_method("math.Mat4.invert()", Mat4_invert_0);
+  pgl_wren_bind_method("math.Noise.perlin2d(_,_,_,_)",Noise_perlin2d_4);
+  pgl_wren_bind_method("math.Noise.seed(_)",Noise_seed_1);
 
   //graphics
   pgl_wren_bind_class("graphics.Texture", Texture_allocate, Texture_finalize);
@@ -65,15 +77,19 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_class("graphics.GraphicsBuffer", GraphicsBuffer_allocate, GraphicsBuffer_finalize);
   pgl_wren_bind_method("graphics.GraphicsBuffer.init(_,_,_,_)", GraphicsBuffer_init_4);
   pgl_wren_bind_class("graphics.InternalAttribute", InternalAttribute_allocate, InternalAttribute_finalize);
-  pgl_wren_bind_method("graphics.InternalAttribute.enable()", InternalAttribute_enable_0);
   pgl_wren_bind_class("graphics.InternalVertexIndices", InternalVertexIndices_allocate, InternalVertexIndices_finalize);
-  pgl_wren_bind_method("graphics.InternalVertexIndices.draw()", InternalVertexIndices_draw_0);
-  pgl_wren_bind_method("graphics.Renderer.render(_)", Renderer_render_1);
-  pgl_wren_bind_method("graphics.Renderer.setTransform(_)", Renderer_setTransform_1);
-  pgl_wren_bind_method("graphics.Renderer.setCameraCoords(_,_,_,_,_,_,_,_,_)", Renderer_setCamera_9);
   pgl_wren_bind_method("graphics.Renderer.getErrors()", Renderer_getErrors_0);
-  pgl_wren_bind_method("graphics.Renderer.worldToScreen(_)", Renderer_WorldToScreen_1);
-  pgl_wren_bind_method("graphics.Renderer.screenToWorld(_)", Renderer_ScreenToWorld_1);
+  pgl_wren_bind_method("graphics.Renderer.setViewport(_,_,_,_)", Renderer_setViewport_4);
+  pgl_wren_bind_method("graphics.Renderer.enableAttributeInternal(_)", Renderer_enableAttribute_1);
+  pgl_wren_bind_method("graphics.Renderer.drawIndicesInternal(_)", Renderer_drawIndices_1);
+  pgl_wren_bind_method("graphics.Renderer.setUniformMat4(_,_)", Renderer_setUniformMat4_2);
+  pgl_wren_bind_method("graphics.Renderer.setUniformVec3(_,_)", Renderer_setUniformVec3_2);
+  pgl_wren_bind_method("graphics.Renderer.setShaderInternal(_)", Renderer_setProgram_1);
+  pgl_wren_bind_method("graphics.Renderer.setUniformTexture(_,_,_)", Renderer_setUniformTexture_3);
+  pgl_wren_bind_class("graphics.InternalShader", InternalShader_allocate, InternalShader_finalize);
+  pgl_wren_bind_method("graphics.InternalShader.bindAttribute(_,_)", InternalShader_bindAttribute_2);
+  pgl_wren_bind_method("graphics.InternalShader.bindUniform(_,_)", InternalShader_bindUniform_2);
+
 
   //memory
   pgl_wren_bind_class("memory.Buffer", Buffer_allocate, Buffer_finalize);

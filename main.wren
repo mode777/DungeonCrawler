@@ -1,112 +1,75 @@
 import "platform" for Application, Keyboard, Window, Severity, Mouse
-import "graphics" for Transform, Camera, Renderer, Geometry, Mesh
-import "geometry" for AttributeType, GeometryData
+import "graphics" for Renderer, Geometry, Mesh, UniformType, Shader, DiffuseMaterial, Colors
+import "geometry" for AttributeType, GeometryData, GeometryWriter
 import "gltf" for Gltf
+import "math" for Mat4, Vec2, Math, Vec3, Noise
+import "camera" for PointAtCamera, FlyCamera
+import "hexaglott" for Hexaglott, HexData
+import "memory" for FloatVecAccessor, UShortAccessor, UByteVecAccessor, Buffer, BufferView, DataType
+import "image" for Image
 
-var mesh = null
-var single = null
-var singleTransform = null
-var texture = null
-var transform = null
-var camera = null
+var width = 1280
+var height = 720
+
+var meshes = []
+var camera
+var light = [1,2,1]
 
 Application.onInit {
-  Application.logLevel(Severity.Warning)
-  Window.config(640,400,"WrenGame!")
+  Application.logLevel(Severity.Debug)
+  Window.config(width,height,"My Game Engine!")
 }
 
 Application.onLoad {
-  //var gltf = GLTF.load("./assets/desert/scene2.gltf")
-  var gltf = Gltf.fromFile("./assets/blocks/stone1.gltf")
-  //mesh = gltf.meshes[0].toGraphicsMesh()
-  var merged = GeometryData.merge(gltf.meshes[0].primitives)
-  
-  single = Mesh.new([Geometry.new(merged)])
-  singleTransform = Transform.new() 
-  
-  var geos = []
-  
-  transform = Transform.new()
-  for (y in -4...4) {
-    for (x in -4...4) {
-      transform.reset()
-      transform.translate(x,-1,0.5*y)
-      var geo = GeometryData.clone(merged)
-      geo.transform(AttributeType.Position, transform)        
-      geos.add(geo)    
-    }      
-  }
-  merged = GeometryData.merge(geos)
 
-  mesh = Mesh.new([Geometry.new(merged)])
+  var shader = Hexaglott.createShader()
+  Renderer.setShader(shader)
+
+  var size = 0.125
+  var w = 2 * size
+  var h = 3.sqrt * size
+
+  // var gd = HexData.new(256, size)
+  // for(y in 0...16){
+  //   for(x in 0...16){
+  //     var z = (x.cos+1+y.sin+1)/4
+  //     z = (z*16).floor / 16
+  //     gd.addHexagon(x,y,z, [y*16,x*16,(x*y)%255,255])
+  //   }
+  // }
+
+  var gltfTree = Gltf.fromFile("./assets/sphere.gltf")
+  var gltfGround = Gltf.fromFile("./assets/ground.gltf")
+  //var gd = gltf.meshes[0].primitives[0]
+
+  var tree = Geometry.new(gltfTree.meshes[0].primitives[0])
+  var ground = Geometry.new(gltfGround.meshes[0].primitives[0])
+
+  var mat = Hexaglott.createMaterial()
+
+  meshes.add(Mesh.new(tree, mat))
+  meshes.add(Mesh.new(ground, mat))
   
-  texture = gltf.textures[0].toGraphicsTexture()
-  
-  camera = Camera.new()
-  camera.move(-3,1,0)
+  camera = FlyCamera.new()
+  Mouse.setPosition(width/2,height/2)
 }
 
-Application.onUpdate {|delta|   
+Application.onUpdate {|delta|
   
-  if(Keyboard.isDown("w")){
-    camera.rotate(0,0, 0.02)
-  } else if(Keyboard.isDown("s")) {
-    camera.rotate(0,0, -0.02)
+  if(Keyboard.isDown("right")) camera.moveRight(0.1)
+  if(Keyboard.isDown("left")) camera.moveRight(-0.1)
+  if(Keyboard.isDown("up")) camera.moveForward(0.1)
+  if(Keyboard.isDown("down")) camera.moveForward(-0.1)
+  
+
+  if(Keyboard.isDown("w")) camera.pitch(0.5) 
+  if(Keyboard.isDown("a")) camera.yaw(-0.5)
+  if(Keyboard.isDown("s")) camera.pitch(-0.5)
+  if(Keyboard.isDown("d")) camera.yaw(0.5)
+  
+  camera.enable()
+  Renderer.setUniformVec3(UniformType.Light0, light)
+  for(mesh in meshes){
+    mesh.draw()
   }
-
-  if(Keyboard.isDown("q")){
-    camera.rotate(0.02,0, 0)
-  } else if(Keyboard.isDown("e")) {
-    camera.rotate(-0.02,0, 0)
-  }
-
-  if(Keyboard.isDown("a")){
-    camera.rotate(0,0.02,0)
-  } else if(Keyboard.isDown("d")) {
-    camera.rotate(0,-0.02,0)
-  }
-
-  if(Keyboard.isDown("up")){
-    camera.move(0.02, 0, 0)
-  } else if(Keyboard.isDown("down")) {
-    camera.move(-0.02, 0, 0)
-  }
-
-  if(Keyboard.isDown("left")){
-    camera.move(0,0,-0.02)
-  } else if(Keyboard.isDown("right")) {
-    camera.move(0,0,0.02)
-  }
-
-  if(Keyboard.isDown("o")){
-    camera.move(0,0.02,0)
-  } else if(Keyboard.isDown("l")) {
-    camera.move(0,-0.02,0)
-  }
-
-  Renderer.setCamera(camera)
-
-  var mouse = Mouse.position
-  var v3 = [mouse[0],mouse[1], -0.01]
-  //var v3 = [0,0,0]
-  //Renderer.worldToScreen(v3)
-  Renderer.screenToWorld(v3)
-  System.print(v3)
-  singleTransform.translate(v3[0], v3[1], v3[2])
-  Renderer.setTransform(singleTransform)
-  single.draw()
-  singleTransform.reset()
-  Renderer.setTransform(singleTransform)
-
-  mesh.draw()
-  // for (y in -4...4) {
-  //   for (x in -4...4) {
-  //     //System.print("x: %(x), y: %(y)")
-  //     transform.reset()
-  //     transform.translate(x,-1,0.5*y)        
-  //     Renderer.setTransform(transform)
-  //     mesh.draw()    
-  //     Renderer.checkErrors()
-  //   }      
-  // }  
 }

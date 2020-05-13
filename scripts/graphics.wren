@@ -1,6 +1,35 @@
 import "image" for Image
-import "geometry" for Transform
-import "vector" for Vec3
+import "math" for Vec3, Mat4, Math
+import "io" for File
+import "geometry" for AttributeType
+
+class Colors {
+  static init() {
+    __white = [255,255,255,255]
+    __grey = [128,128,128,255]
+    __darkgrey = [64,64,64,255]
+    __red = [255,0,0,255]
+    __green = [0,255,0,255]
+    __blue = [0,0,255,255]
+  }
+  static White {__white}
+  static Grey {__grey}
+  static DarkGrey {__darkgrey}
+  static Red {__red}
+  static Green {__green}
+  static Blue {__blue}
+}
+
+class UniformType {
+  static Model { 0 }
+  static View { 1 }
+  static Projection { 2 }
+  static Normal { 3 }
+  static Texture0 { 5 }
+  // reserved
+  static Light0 { 12 }
+  // reserved
+}
 
 foreign class Texture {
   construct fromImage(img){
@@ -31,10 +60,12 @@ foreign class GraphicsBuffer {
 
 foreign class InternalAttribute {
   construct new(graphicsBuffer, attrType, numComp, dataType, normalized, stride, offset){}
-  foreign enable()
 }
 
 class Attribute {
+
+  internal { _internal }
+
   construct new(graphicsBuffer, attrType, numComp, dataType, normalized, stride, offset){
     _graphicsBuffer = graphicsBuffer
     _internal = InternalAttribute.new(graphicsBuffer, attrType, numComp, dataType, normalized, stride, offset)
@@ -44,43 +75,49 @@ class Attribute {
     _graphicsBuffer = gBuffer
     _internal = InternalAttribute.new(gBuffer, attrType, accessor.numComponents, accessor.componentType, normalized, accessor.stride, accessor.offset) 
   }
-
-  enable() {
-    _internal.enable()
-  }
 }
 
 foreign class InternalVertexIndices {
   construct new(graphicsBuffer, count, componentType){}
-  foreign draw()
 }
 
 class VertexIndices {
+
+  internal { _internal }
+
   construct new(graphicsBuffer, count, componentType){
     _internal = InternalVertexIndices.new(graphicsBuffer, count, componentType)
     _buffer = graphicsBuffer
   }
-  draw(){
-    _internal.draw()
-  }
 }
 
 class Renderer {
-  //foreign static render(primitive)
-  foreign static setTransform(transform)
-  foreign static setCameraCoords(eye_x, eye_y, eye_z, target_x, target_y, target_z, up_x, up_y, up_z)
-  static setCamera(camera) {
-    Renderer.setCameraCoords(camera.eye[0], camera.eye[1], camera.eye[2], camera.target[0], camera.target[1], camera.target[2], camera.up[0], camera.up[1], camera.up[2])
-  }
+  static shader{ __shader }
   foreign static getErrors()
+  foreign static setViewport(x,y,w,h)
+  foreign static enableAttributeInternal(attr)
+  static enableAttribute(attr) { 
+    Renderer.enableAttributeInternal(attr.internal) 
+  }
+  foreign static drawIndicesInternal(indices)
+  static drawIndices(indices) { 
+    Renderer.drawIndicesInternal(indices.internal) 
+  }
+  foreign static setUniformMat4(type, mat4)
+  foreign static setShaderInternal(shaderInt)
+  static setShader(shader) { 
+    __shader = shader
+    Renderer.setShaderInternal(shader.internal) 
+  }
+  foreign static setUniformTexture(type, unit, texture)
+  foreign static setUniformVec3(type, vec3)
+
   static checkErrors(){
     var errors = Renderer.getErrors()
     if(errors.count > 0){
       Fiber.abort(errors.join(", "))
     }
   }
-  foreign static worldToScreen(vec3)
-  foreign static screenToWorld(vec3)
 }
 
 class Geometry { 
@@ -111,131 +148,112 @@ class Geometry {
         buffers.add(gBuffer)
         views.add(view)
       }
-      var attribute = Attribute.fromAccessor(accessor, key, /*TODO*/false, gBuffer)
+      var attribute = Attribute.fromAccessor(accessor, key, accessor.normalized, gBuffer)
       _attributes.add(attribute)
     }  
 
     var indexAccessor = geometryData.indices
     var indexBuffer = GraphicsBuffer.forIndices(indexAccessor.bufferView)
-    
     _index = VertexIndices.new(indexBuffer, indexAccessor.count, indexAccessor.componentType)
   }
 
   draw(){
     for(a in _attributes){
-      a.enable()
+      Renderer.enableAttribute(a)
     }
-    _index.draw()
-  }
-}
-
-class Camera {
-
-  eye { 
-    update()
-    return _eye 
-  }
-  
-  target { 
-    update()
-    return _target 
-  }
-  
-  up { 
-    update()
-    return _up 
-  }
-
-  construct new(){
-    _eye = [0,0,0]
-    _target = [100,0,0]
-    _up = [0,1,0]
-    _rotate = [0,0,0]
-    _movement = [0,0,0]
-    _dirty = false
-    _transform = Transform.new()
-    _combined = _eye + _target
-    _position = [0,0,0]
-    _tmp = [0,0,0]
-  }
-
-  update(){
-    if(_dirty){
-      _combined[0] = 0
-      _combined[1] = 0
-      _combined[2] = 0
-
-      _combined[3] = 1
-      _combined[4] = 0
-      _combined[5] = 0
-
-      _transform.reset()
-      _transform.rotate(0,_rotate[1], 0)
-      _transform.rotate(0, 0, _rotate[2])
-      _transform.rotate(_rotate[0], 0, 0)
-      
-      Vec3.set(0,1,0, _up)
-      _transform.transformVectors(_up)
-      
-      _transform.translate(_movement[0], _movement[1], _movement[2])
-
-      _transform.transformVectors(_combined)
-
-      Vec3.extract(_combined, 0, _eye)
-      Vec3.extract(_combined, 3, _target)
-
-      Vec3.add(_position, _eye, _eye)
-      Vec3.add(_position, _target, _target)
-      
-      Vec3.copy(_eye,_position)
-
-      Vec3.zero(_movement)
-
-      _dirty = false
-    }
-  }
-
-  rotate(x,y,z){
-    Vec3.add(_rotate, x, y, z, _rotate)
-    _dirty = true
-  }
-
-  move(x, y, z){
-    Vec3.add(_movement, x, y, z, _movement)
-    _dirty = true
+    Renderer.drawIndices(_index)
   }
 }
 
 class Mesh {
-  construct new(geometryList){
-    _geometry = geometryList
+
+  transform { _transform }
+
+  construct new(geometry, material){
+    _geometry = geometry
+    _material = material
+    _transform = Mat4.new()
   }
 
   draw(){
-    for(geo in _geometry){
-      geo.draw()
-    }
+    Renderer.setUniformMat4(UniformType.Model, _transform)
+    _material.use()
+    _geometry.draw()
   }
 }
 
-// class Mesh {
+class DiffuseMaterial {
+  construct new(texture){
+    _texture = texture
+  }
 
-//   construct new(geoData, material){
-//     _attributes = []
-//     loadGeoData(geoData)
-//   }
+  use(){
+    Renderer.setUniformTexture(UniformType.Texture0, 0, _texture)
+  }
+}
 
-//   loadGeoData(geoData){
-//     var gBuffers = {}
-//     for(accessor in geoData){
-//       var gBuffer = gBuffers[accessor.bufferView]      
-//       if(!gBuffer){
-//         gBuffer = GraphicsBuffer.forVertices(accessor.bufferView)
-//         gBuffers[accessor.bufferView] = gBuffer
-//       }
-      
-//       _attributes[]
-//     }
-//   }
+foreign class InternalShader {
+  construct new(vertexSrc, fragmentSrc){}
+  foreign bindAttribute(type, name)
+  foreign bindUniform(type, name)
+}
 
-// }
+class Shader {
+
+  static default3d {
+    if(!__default3d){
+      var mapping = {
+        "attributes": {
+          "vPosition": AttributeType.Position,
+          "vTexcoord": AttributeType.Texcoord0,
+          "vNormal": AttributeType.Normal
+        },
+        "uniforms": {
+          "uProjection": UniformType.Projection,
+          "uModel": UniformType.Model,
+          "uView": UniformType.View,
+          "uTexture": UniformType.Texture0,
+          "uLight0": UniformType.Light0,
+          "uNormal": UniformType.Normal
+        }
+      } 
+      __default3d = Shader.fromFiles("./shaders/3d.vertex.glsl","./shaders/3d.fragment.glsl", mapping)
+    }
+    return __default3d
+  }
+
+  internal { _internal }
+
+  construct new(vertexSrc, fragmentSrc, mapping){
+    _internal = InternalShader.new(vertexSrc, fragmentSrc)
+    init(mapping)
+  }
+
+  construct fromFiles(vertexPath, fragmentPath, mapping){
+    var vsrc = File.open(vertexPath, "rb").readToEnd()
+    var fsrc = File.open(fragmentPath, "rb").readToEnd()
+
+    _internal = InternalShader.new(vsrc, fsrc)
+    init(mapping)
+  }
+
+  init(mapping){
+
+    if(mapping.containsKey("attributes")){
+      for(key in mapping["attributes"].keys){
+        _internal.bindAttribute(mapping["attributes"][key], key)
+      }
+    }
+    if(mapping.containsKey("uniforms")){
+      for(key in mapping["uniforms"].keys){
+        _internal.bindUniform(mapping["uniforms"][key], key)
+      }
+    }
+  }
+
+}
+
+
+
+
+

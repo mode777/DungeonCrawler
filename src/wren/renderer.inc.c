@@ -1,31 +1,6 @@
 #include "wrenapi.h"
 #include <modules/renderer3d.h>
 
-void Renderer_render_1(WrenVM* vm){
-  PGLPrimitive* prim = *(PGLPrimitive**)wrenGetSlotForeign(vm, 1);
-  pgl3DDrawPrimitive(prim);
-}
-
-void Renderer_setTransform_1(WrenVM* vm){
-  PGLTransform* t = *(PGLTransform**)wrenGetSlotForeign(vm, 1);
-  pgl3DSetModelTransform(t);
-}
-
-void Renderer_setCamera_9(WrenVM* vm){
-  
-  vec3 vectors[3];
-  
-  for (size_t i = 0; i < 3; i++)
-  {
-    for (size_t j = 0; j < 3; j++)
-    {
-      vectors[i][j] = (float)wrenGetSlotDouble(vm, i*3+j+1);
-    }    
-  }
-
-  pgl3DSetCamera(vectors[0], vectors[1], vectors[2]);
-}
-
 void Renderer_getErrors_0(WrenVM* vm){
   wrenSetSlotNewList(vm, 0);
   GLenum err;
@@ -36,112 +11,47 @@ void Renderer_getErrors_0(WrenVM* vm){
   }
 }
 
-static void Renderer_WorldToScreen_1(WrenVM* vm){
-  int vectors = wrenGetListCount(vm, 1) / 3;
-  for (size_t i = 0; i < vectors; i++)
+void Renderer_setViewport_4(WrenVM* vm){
+  vec4 vp;
+  for (int i = 1; i <= 4; i++)
   {
-    vec3 v;
-    for (size_t j = 0; j < 3; j++)
-    {
-      wrenGetListElement(vm, 1, i*3+j, 0);
-      v[j] = (float)wrenGetSlotDouble(vm, 0);
-    }
-    pglWorldToScreen(v, v);
-    for (size_t j = 0; j < 3; j++)
-    {
-      wrenSetSlotDouble(vm, 0, v[j]);
-      wrenSetListElement(vm, 1, i*3+j, 0);
-    }
-  }  
+    vp[i-1] = (float)wrenGetSlotDouble(vm, i);
+  }
+  pgl3DSetViewport(vp[0], vp[1], vp[2], vp[3]);  
 }
 
-static void Renderer_ScreenToWorld_1(WrenVM* vm){
-  int vectors = wrenGetListCount(vm, 1) / 3;
-  for (size_t i = 0; i < vectors; i++)
-  {
-    vec3 v;
-    for (size_t j = 0; j < 3; j++)
-    {
-      wrenGetListElement(vm, 1, i*3+j, 0);
-      v[j] = (float)wrenGetSlotDouble(vm, 0);
-    }
-    pglScreenToWorld(v, v);
-    for (size_t j = 0; j < 3; j++)
-    {
-      wrenSetSlotDouble(vm, 0, v[j]);
-      wrenSetListElement(vm, 1, i*3+j, 0);
-    }
-  }  
+static void Renderer_enableAttribute_1(WrenVM* vm){
+  PGLAttribute* attr = (PGLAttribute*)wrenGetSlotForeign(vm, 1);
+  pglAttributeEnable(attr);
 }
 
-static void Transform_allocate(WrenVM* vm){
-  PGLTransform* t = pglTransformCreate();
-  PGLTransform** handle = pgl_wren_new(vm, PGLTransform*);
-  *handle = t;
+static void Renderer_drawIndices_1(WrenVM* vm){
+  PGLVertexIndices* indices = (PGLVertexIndices*)wrenGetSlotForeign(vm, 1);
+  pglIndicesDraw(indices);
 }
 
-static void Transform_finalize(void* data){
-  PGLTransform* t = *(PGLTransform**)data;
-  pglTransformDelete(t);
+static void Renderer_setUniformMat4_2(WrenVM* vm){
+  int type = (int)wrenGetSlotDouble(vm, 1);
+  float* mat = (float*)wrenGetSlotForeign(vm, 2);
+  pglSetUniformMat4(type, mat);
 }
 
-static void Transform_translate_3(WrenVM* vm){
-  PGLTransform* t = *(PGLTransform**)wrenGetSlotForeign(vm,0);
-  float x = (float)wrenGetSlotDouble(vm, 1);
-  float y = (float)wrenGetSlotDouble(vm, 2);
-  float z = (float)wrenGetSlotDouble(vm, 3);
-  pglTransformTranslate(t, x, y, z);
+static void Renderer_setUniformVec3_2(WrenVM* vm){
+  int type = (int)wrenGetSlotDouble(vm, 1);
+  vec3 v;
+  get_vec3(vm, 2,0,0, v);
+  pglSetUniformVec3(type, v);
 }
 
-static void Transform_rotate_3(WrenVM* vm){
-  PGLTransform* t = *(PGLTransform**)wrenGetSlotForeign(vm,0);
-  float x = (float)wrenGetSlotDouble(vm, 1);
-  float y = (float)wrenGetSlotDouble(vm, 2);
-  float z = (float)wrenGetSlotDouble(vm, 3);
-  pglTransformRotate(t, x, y, z);
+static void Renderer_setProgram_1(WrenVM* vm){
+  PGLProgram* prog = *(PGLProgram**)wrenGetSlotForeign(vm, 1);
+  pgl3DSetProgram(prog);
 }
 
-static void Transform_scale_3(WrenVM* vm){
-  PGLTransform* t = *(PGLTransform**)wrenGetSlotForeign(vm,0);
-  float x = (float)wrenGetSlotDouble(vm, 1);
-  float y = (float)wrenGetSlotDouble(vm, 2);
-  float z = (float)wrenGetSlotDouble(vm, 3);
-  pglTransformScale(t, x, y, z);
-}
-
-static void Transform_reset_0(WrenVM* vm){
-  PGLTransform* t = *(PGLTransform**)wrenGetSlotForeign(vm,0);
-  pglTransformReset(t);
-}
-
-static void Transform_load_1(WrenVM* vm){
-  PGLTransform* t = *(PGLTransform**)wrenGetSlotForeign(vm,0);
-  PGLTransform* source = *(PGLTransform**)wrenGetSlotForeign(vm,1);
-  pglTransformLoad(t, source);
-}
-
-static void Transform_apply_1(WrenVM* vm){
-  PGLTransform* t = *(PGLTransform**)wrenGetSlotForeign(vm,0);
-  PGLTransform* source = *(PGLTransform**)wrenGetSlotForeign(vm,1);
-  pglTransformApply(t, source);
-}
-
-static void Transform_transformVectors_1(WrenVM* vm){
-  PGLTransform* t = *(PGLTransform**)wrenGetSlotForeign(vm,0);
-  int vectors = wrenGetListCount(vm, 1) / 3;
-  for (size_t i = 0; i < vectors; i++)
-  {
-    vec3 v;
-    for (size_t j = 0; j < 3; j++)
-    {
-      wrenGetListElement(vm, 1, i*3+j, 0);
-      v[j] = (float)wrenGetSlotDouble(vm, 0);
-    }
-    pglTransformVector(t, v, v);
-    for (size_t j = 0; j < 3; j++)
-    {
-      wrenSetSlotDouble(vm, 0, v[j]);
-      wrenSetListElement(vm, 1, i*3+j, 0);
-    }
-  }  
+static void Renderer_setUniformTexture_3(WrenVM* vm){
+  int type = (int)wrenGetSlotDouble(vm,1);
+  int unit = (int)wrenGetSlotDouble(vm,2);
+  PGLTexture* texture = *(PGLTexture**)wrenGetSlotForeign(vm, 3);
+  pglSetTextureUnit(unit, texture->handle);
+  pglSetUniformi(type, unit);
 }

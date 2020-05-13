@@ -47,9 +47,9 @@ static void GraphicsBuffer_init_4(WrenVM* vm){
 }
 
 static void InternalAttribute_allocate(WrenVM* vm){
-  PGLAttribute2* attr = pgl_wren_new(vm, PGLAttribute2);
+  PGLAttribute* attr = pgl_wren_new(vm, PGLAttribute);
   attr->buffer = *(GLuint*)wrenGetSlotForeign(vm, 1);
-  attr->type = (PGLAttributeType)wrenGetSlotDouble(vm, 2);
+  attr->type = (unsigned int)wrenGetSlotDouble(vm, 2);
   attr->numComponents = (int)wrenGetSlotDouble(vm, 3);
   attr->componentType = (GLenum)wrenGetSlotDouble(vm, 4);
   attr->normalized = wrenGetSlotBool(vm, 5);
@@ -61,11 +61,6 @@ static void InternalAttribute_allocate(WrenVM* vm){
 static void InternalAttribute_finalize(void* data){
   // nothing
   pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Free Attribute %p", data);
-}
-
-static void InternalAttribute_enable_0(WrenVM* vm){
-  PGLAttribute2* attr = (PGLAttribute2*)wrenGetSlotForeign(vm, 0);
-  pglAttributeEnable(attr);
 }
 
 static void InternalVertexIndices_allocate(WrenVM* vm){
@@ -81,7 +76,37 @@ static void InternalVertexIndices_finalize(void* data){
   pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Free Vertex Indices %p", data);
 }
 
-static void InternalVertexIndices_draw_0(WrenVM* vm){
-  PGLVertexIndices* indices = (PGLVertexIndices*)wrenGetSlotForeign(vm, 0);
-  pglIndicesDraw(indices);
+static void InternalShader_allocate(WrenVM* vm){
+  const char* vs = wrenGetSlotString(vm, 1);
+  const char* fs = wrenGetSlotString(vm, 2);
+  PGLProgram* p = pglProgramCreate(vs,fs);
+  if(p == NULL){
+    pgl_wren_runtime_error(vm, "Shader compilation error");
+  } 
+  PGLProgram** prog = pgl_wren_new(vm, PGLProgram*);
+  *prog = p;
+  pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Allocated Program %p", prog);
 }
+
+static void InternalShader_finalize(void* data){
+  pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Free Program %p", data);
+  pglProgramDelete(*(PGLProgram**)data);
+}
+
+static void InternalShader_bindAttribute_2(WrenVM* vm){
+  PGLProgram* p = *(PGLProgram**)wrenGetSlotForeign(vm, 0);
+  int type = (int)wrenGetSlotDouble(vm, 1);
+  const char* name = wrenGetSlotString(vm, 2);
+  p->attributes[type] = glGetAttribLocation(p->program, name);
+}
+
+static void InternalShader_bindUniform_2(WrenVM* vm){
+  PGLProgram* p = *(PGLProgram**)wrenGetSlotForeign(vm, 0);
+  int type = (int)wrenGetSlotDouble(vm, 1);
+  const char* name = wrenGetSlotString(vm, 2);
+  p->uniforms[type] = glGetUniformLocation(p->program, name);
+}
+
+
+
+

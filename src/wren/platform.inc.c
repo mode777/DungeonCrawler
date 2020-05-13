@@ -31,9 +31,15 @@ void Application_quit_0(WrenVM* vm){
 }
 
 void Mouse_getPosition_1(WrenVM* vm){
-  PGLMousePos mouse = pglMousePosition();
+  PGLMousePos mouse = pglGetMousePosition();
   wrenSetSlotDouble(vm, 0, (double)mouse.x);
   wrenSetListElement(vm, 1, 0, 0);
   wrenSetSlotDouble(vm, 0, (double)mouse.y);
   wrenSetListElement(vm, 1, 1, 0);
+}
+
+void Mouse_setPosition_2(WrenVM* vm){
+  int x = (int)wrenGetSlotDouble(vm, 1);
+  int y = (int)wrenGetSlotDouble(vm, 2);
+  pglSetMousePosition(x,y);
 }
