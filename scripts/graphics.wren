@@ -175,9 +175,15 @@ class Mesh {
     _transform = Mat4.new()
   }
 
+  construct new(geometry, material, transform){
+    _geometry = geometry
+    _material = material
+    _transform = transform
+  }
+
   draw(){
     Renderer.setUniformMat4(UniformType.Model, _transform)
-    _material.use()
+    if(_material) _material.use()
     _geometry.draw()
   }
 }

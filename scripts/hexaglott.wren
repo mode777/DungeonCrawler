@@ -127,14 +127,16 @@ class Hexaglott {
     var mapping = {
       "attributes": {
         "vPosition": AttributeType.Position,
-        "vColor": AttributeType.Color,
-        "vNormal": AttributeType.Normal
+        //"vColor": AttributeType.Color,
+        "vNormal": AttributeType.Normal,
+        "vTexcoord": AttributeType.Texcoord0
       },
       "uniforms": {
         "uProjection": UniformType.Projection,
         "uModel": UniformType.Model,
         "uView": UniformType.View,
-        "uLight": UniformType.Light0
+        "uLight": UniformType.Light0,
+        "uTexture": UniformType.Texture0
       }
     }
     

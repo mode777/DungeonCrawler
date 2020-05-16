@@ -2,7 +2,7 @@ import "augur" for Augur, Assert
 import "image" for Image
 import "geometry" for AttributeType, GeometryData
 import "memory" for DataType, Buffer, BufferView, FloatVecAccessor, UShortAccessor
-import "graphics" for Geometry, Texture, Attribute, GraphicsBuffer, VertexIndices, Renderer, Mesh, Shader, UniformType, PerspectiveCamera
+import "graphics" for Geometry, Texture, Attribute, GraphicsBuffer, VertexIndices, Renderer, Mesh, Shader, UniformType
 
 Augur.describe("Texture") {
 
@@ -103,7 +103,7 @@ Augur.describe("Mesh"){
   Augur.it("construct from Geometry"){
     var g1 = createG.call()
     var g2 = createG.call()
-    var m = Mesh.new([g1,g2])
+    var m = Mesh.new([g1,g2], null)
   }
 }
 
@@ -115,10 +115,4 @@ Augur.describe("Shader"){
     Renderer.checkErrors()
   }
 
-}
-
-Augur.describe("PerspectiveCamera") {
-  Augur.it("creates"){
-    var c = PerspectiveCamera.new()
-  }
 }

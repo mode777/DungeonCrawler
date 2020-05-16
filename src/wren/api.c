@@ -58,6 +58,7 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("math.Mat4.rotateX(_)", Mat4_rotateX_1);
   pgl_wren_bind_method("math.Mat4.rotateY(_)", Mat4_rotateY_1);
   pgl_wren_bind_method("math.Mat4.rotateZ(_)", Mat4_rotateZ_1);
+  pgl_wren_bind_method("math.Mat4.rotateQuat(_,_,_,_)", Mat4_rotateQuat_4);
   pgl_wren_bind_method("math.Mat4.scale(_,_,_)", Mat4_scale_3);
   pgl_wren_bind_method("math.Mat4.copy(_)", Mat4_copy_1);
   pgl_wren_bind_method("math.Mat4.mul(_)", Mat4_mul_1);

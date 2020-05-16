@@ -8,6 +8,12 @@ class ListUtil {
     return -1
   }
 
+  static first(list, fn){
+    for(e in list){
+      if(fn.call(e)) return e
+    }
+  }
+
   static mapUnique(list, fn){
     var visited = []
     var generated = []

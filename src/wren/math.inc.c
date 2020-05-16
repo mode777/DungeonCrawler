@@ -60,6 +60,18 @@ static void Mat4_rotateZ_1(WrenVM* vm){
   glm_rotate_z(m, angle, m);
 }
 
+static void Mat4_rotateQuat_4(WrenVM* vm){
+  float* m = wrenGetSlotForeign(vm, 0);
+  mat4 mat;
+  float q[4];
+  q[0] = (float)wrenGetSlotDouble(vm, 1);
+  q[1] = (float)wrenGetSlotDouble(vm, 2);
+  q[2] = (float)wrenGetSlotDouble(vm, 3);
+  q[3] = (float)wrenGetSlotDouble(vm, 4);
+  glm_quat_mat4(q, mat);
+  glm_mat4_mul(m, mat, m);
+}
+
 static void Mat4_scale_3(WrenVM* vm){
   float* m = wrenGetSlotForeign(vm, 0);
   vec3 v;

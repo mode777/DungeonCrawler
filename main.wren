@@ -1,5 +1,5 @@
 import "platform" for Application, Keyboard, Window, Severity, Mouse
-import "graphics" for Renderer, Geometry, Mesh, UniformType, Shader, DiffuseMaterial, Colors
+import "graphics" for Renderer, Geometry, Mesh, UniformType, Shader, DiffuseMaterial, Colors, Texture
 import "geometry" for AttributeType, GeometryData, GeometryWriter
 import "gltf" for Gltf
 import "math" for Mat4, Vec2, Math, Vec3, Noise
@@ -13,7 +13,8 @@ var height = 720
 
 var meshes = []
 var camera
-var light = [1,2,1]
+var light = [1,1,1]
+var texture
 
 Application.onInit {
   Application.logLevel(Severity.Debug)
@@ -25,48 +26,16 @@ Application.onLoad {
   var shader = Hexaglott.createShader()
   Renderer.setShader(shader)
 
-  var size = 0.125
-  var w = 2 * size
-  var h = 3.sqrt * size
-
-  // var gd = HexData.new(256, size)
-  // for(y in 0...16){
-  //   for(x in 0...16){
-  //     var z = (x.cos+1+y.sin+1)/4
-  //     z = (z*16).floor / 16
-  //     gd.addHexagon(x,y,z, [y*16,x*16,(x*y)%255,255])
-  //   }
-  // }
-
-  var gltfTree = Gltf.fromFile("./assets/sphere.gltf")
-  var gltfGround = Gltf.fromFile("./assets/ground.gltf")
-  //var gd = gltf.meshes[0].primitives[0]
-
-  var tree = Geometry.new(gltfTree.meshes[0].primitives[0])
-  var ground = Geometry.new(gltfGround.meshes[0].primitives[0])
-
-  var mat = Hexaglott.createMaterial()
-
-  meshes.add(Mesh.new(tree, mat))
-  meshes.add(Mesh.new(ground, mat))
+  var gltf = Gltf.fromFile("./assets/three.gltf")
+  meshes = gltf.scene("Scene").toGraphicsMeshes()
+  texture = Texture.fromFile("./assets/palette.png")
   
-  camera = FlyCamera.new()
-  Mouse.setPosition(width/2,height/2)
+  camera = PointAtCamera.new()
+  camera.setPosition(5, 2, 0)
+  camera.setTarget(0, 1, 0)
 }
 
 Application.onUpdate {|delta|
-  
-  if(Keyboard.isDown("right")) camera.moveRight(0.1)
-  if(Keyboard.isDown("left")) camera.moveRight(-0.1)
-  if(Keyboard.isDown("up")) camera.moveForward(0.1)
-  if(Keyboard.isDown("down")) camera.moveForward(-0.1)
-  
-
-  if(Keyboard.isDown("w")) camera.pitch(0.5) 
-  if(Keyboard.isDown("a")) camera.yaw(-0.5)
-  if(Keyboard.isDown("s")) camera.pitch(-0.5)
-  if(Keyboard.isDown("d")) camera.yaw(0.5)
-  
   camera.enable()
   Renderer.setUniformVec3(UniformType.Light0, light)
   for(mesh in meshes){

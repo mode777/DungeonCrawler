@@ -173,6 +173,7 @@ foreign class Mat4 {
   foreign rotateX(v)
   foreign rotateY(v)
   foreign rotateZ(v)
+  foreign rotateQuat(a,b,c,d)
   foreign scale(x,y,z)
   foreign copy(m)
   foreign mul(m)

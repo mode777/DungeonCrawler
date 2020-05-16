@@ -3,7 +3,8 @@ import "gltf" for Gltf
 import "geometry" for AttributeType
 import "graphics" for Renderer
 
-Augur.describe("Gltf") {
+Augur.describe("Gltf") { 
+
 
   Augur.it("should load file"){
     var gltf = Gltf.fromFile("./tests/gltf/stone2.gltf") 
@@ -12,7 +13,6 @@ Augur.describe("Gltf") {
     Assert.equal(gltf.meshes[0].primitives.count, 2)
     Assert.equal(gltf.meshes[0].primitives[0].count, 3)
     Assert.defined(gltf.meshes[0].primitives[0].indices)
-
     Assert.defined(gltf.meshes[0].primitives[0][AttributeType.Texcoord0])
     Assert.defined(gltf.meshes[0].primitives[0][AttributeType.Position])
     Assert.defined(gltf.meshes[0].primitives[0][AttributeType.Normal])
@@ -26,9 +26,16 @@ Augur.describe("Gltf") {
     Renderer.checkErrors()
   }
 
-  Augur.it("should create mesh"){
+  Augur.it("should create meshes"){
     var gltf = Gltf.fromFile("./tests/gltf/stone2.gltf") 
-    var mesh = gltf.meshes[0].toGraphicsMesh()
+    var meshes = gltf.meshes[0].toGraphicsMeshes()
+    Renderer.checkErrors()
+  }
+
+  Augur.it("should create meshes"){
+    var gltf = Gltf.fromFile("./tests/gltf/three.gltf") 
+    var meshes = gltf.scene("Scene").toGraphicsMeshes()
+    Assert.equal(meshes.count, 4)
     Renderer.checkErrors()
   }
 
