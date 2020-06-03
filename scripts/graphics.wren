@@ -29,6 +29,22 @@ class UniformType {
   // reserved
   static Light0 { 12 }
   // reserved
+  static Time { 16 }
+}
+
+class TextureFilters {
+  static Nearest { 0x2600 }
+  static Linear { 0x2601 }
+  static NearestMipmapNearest { 0x2700 }
+  static LinearMipmapNearest { 0x2701 }
+  static NearestMipmapLinear { 0x2702 }
+  static LinearMipmapLinear { 0x2703 }
+}
+
+class TextureWrap {
+  static Repeat { 0x2901 }
+  static Clamp { 0x812F }
+  static Mirrored { 0x8370 }
 }
 
 foreign class Texture {
@@ -40,6 +56,10 @@ foreign class Texture {
     var img = Image.fromFile(path)
     image(img)
   }
+
+  foreign magFilter(filter)
+  foreign minFilter(filter)
+  foreign wrap(s,t)
 
   // private
   foreign image(img)
@@ -95,6 +115,7 @@ class Renderer {
   static shader{ __shader }
   foreign static getErrors()
   foreign static setViewport(x,y,w,h)
+  foreign static setBackgroundColor(r,g,b)
   foreign static enableAttributeInternal(attr)
   static enableAttribute(attr) { 
     Renderer.enableAttributeInternal(attr.internal) 
@@ -111,12 +132,22 @@ class Renderer {
   }
   foreign static setUniformTexture(type, unit, texture)
   foreign static setUniformVec3(type, vec3)
+  foreign static setUniformVec2(type, vec2)
+  foreign static setUniformFloat(type, f)
 
   static checkErrors(){
     var errors = Renderer.getErrors()
     if(errors.count > 0){
       Fiber.abort(errors.join(", "))
     }
+  }
+
+  static set2d(){
+    Renderer.setShader(Shader.default2d)
+  }
+
+  static set3d(){
+    Renderer.setShader(Shader.default3d)
   }
 }
 
@@ -168,6 +199,7 @@ class Geometry {
 class Mesh {
 
   transform { _transform }
+  geometry { _geometry }
 
   construct new(geometry, material){
     _geometry = geometry
@@ -206,11 +238,28 @@ foreign class InternalShader {
 
 class Shader {
 
+  static default2d {
+    if(!__default2d){
+      var mapping = {
+        "attributes": {
+          "vPosition": AttributeType.Position,
+          "vTexcoord": AttributeType.Texcoord0
+        },
+        "uniforms": {
+          "uTexture": UniformType.Texture0,
+        }
+      }
+      __default2d = Shader.fromFiles("./shaders/2d.vertex.glsl","./shaders/2d.fragment.glsl", mapping)
+    }
+    return __default2d
+  }
+
   static default3d {
     if(!__default3d){
       var mapping = {
         "attributes": {
           "vPosition": AttributeType.Position,
+          "vColor": AttributeType.Color,
           "vTexcoord": AttributeType.Texcoord0,
           "vNormal": AttributeType.Normal
         },
@@ -220,7 +269,8 @@ class Shader {
           "uView": UniformType.View,
           "uTexture": UniformType.Texture0,
           "uLight0": UniformType.Light0,
-          "uNormal": UniformType.Normal
+          "uNormal": UniformType.Normal,
+          "t": UniformType.Time
         }
       } 
       __default3d = Shader.fromFiles("./shaders/3d.vertex.glsl","./shaders/3d.fragment.glsl", mapping)

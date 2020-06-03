@@ -75,6 +75,9 @@ void pgl_wren_bind_api(){
   //graphics
   pgl_wren_bind_class("graphics.Texture", Texture_allocate, Texture_finalize);
   pgl_wren_bind_method("graphics.Texture.image(_)", Texture_image_1);
+  pgl_wren_bind_method("graphics.Texture.magFilter(_)", Texture_magFilter_1);
+  pgl_wren_bind_method("graphics.Texture.minFilter(_)", Texture_minFilter_1);
+  pgl_wren_bind_method("graphics.Texture.wrap(_,_)", Texture_wrap_2);
   pgl_wren_bind_class("graphics.GraphicsBuffer", GraphicsBuffer_allocate, GraphicsBuffer_finalize);
   pgl_wren_bind_method("graphics.GraphicsBuffer.init(_,_,_,_)", GraphicsBuffer_init_4);
   pgl_wren_bind_class("graphics.InternalAttribute", InternalAttribute_allocate, InternalAttribute_finalize);
@@ -85,12 +88,14 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("graphics.Renderer.drawIndicesInternal(_)", Renderer_drawIndices_1);
   pgl_wren_bind_method("graphics.Renderer.setUniformMat4(_,_)", Renderer_setUniformMat4_2);
   pgl_wren_bind_method("graphics.Renderer.setUniformVec3(_,_)", Renderer_setUniformVec3_2);
+  pgl_wren_bind_method("graphics.Renderer.setUniformVec2(_,_)", Renderer_setUniformVec2_2);
+  pgl_wren_bind_method("graphics.Renderer.setUniformFloat(_,_)", Renderer_setUniformFloat_2);
   pgl_wren_bind_method("graphics.Renderer.setShaderInternal(_)", Renderer_setProgram_1);
   pgl_wren_bind_method("graphics.Renderer.setUniformTexture(_,_,_)", Renderer_setUniformTexture_3);
+  pgl_wren_bind_method("graphics.Renderer.setBackgroundColor(_,_,_)", Renderer_setBackgroundColor_3);
   pgl_wren_bind_class("graphics.InternalShader", InternalShader_allocate, InternalShader_finalize);
   pgl_wren_bind_method("graphics.InternalShader.bindAttribute(_,_)", InternalShader_bindAttribute_2);
   pgl_wren_bind_method("graphics.InternalShader.bindUniform(_,_)", InternalShader_bindUniform_2);
-
 
   //memory
   pgl_wren_bind_class("memory.Buffer", Buffer_allocate, Buffer_finalize);
@@ -114,7 +119,8 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("memory.Buffer.readUShortVec(_,_)", Buffer_readUShortVec_2);
   pgl_wren_bind_method("memory.Buffer.readUIntVec(_,_)", Buffer_readUIntVec_2);
   pgl_wren_bind_method("memory.Buffer.readFloatVec(_,_)", Buffer_readFloatVec_2);
-  pgl_wren_bind_method("memory.Buffer.readDoubleVec(_,_)", Buffer_readDoubleVec_2);
+  pgl_wren_bind_method("memory.Buffer.readDoubleVec(_,_)", Buffer_readDoubleVec_2);  
+  pgl_wren_bind_method("memory.Buffer.readString(_,_)", Buffer_readString_2);
   pgl_wren_bind_method("memory.Buffer.writeByte(_,_)", Buffer_writeByte_2);
   pgl_wren_bind_method("memory.Buffer.writeShort(_,_)", Buffer_writeShort_2);
   pgl_wren_bind_method("memory.Buffer.writeInt(_,_)", Buffer_writeInt_2);

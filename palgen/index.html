@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <svg width="256" height="256">
+    <defs>
+      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#ff0" />
+        <stop offset="100%" style="stop-color:#ff0000" />
+      </linearGradient>
+    </defs>
+    <rect width="256" height="8" style="fill:url(#grad1)" />
+    Sorry, your browser does not support inline SVG.  
+  </svg>
+  <textarea onchange="loadPal(event.target.value)"></textarea>
+
+  <script>
+    const svg = document.getElementsByTagName('svg')[0];
+    const defs = svg.getElementsByTagName("defs")[0];
+
+    function addGradient(id, stops){
+      const lg = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      lg.id = id;
+      lg.x1 = "0%"
+      lg.y1 = "0%"
+      lg.x2 = "100%"
+      lg.y2 = "0%"
+      let inner = "";
+
+      for (const key of Object.keys(stops)) {
+        inner += `<stop offset="${key}%"" style="stop-color:${stops[key]}" />`
+      }
+
+      lg.innerHTML = inner;
+
+      defs.appendChild(lg);
+    }
+
+    function addRect(pos, height, gradId){
+      const lg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      
+
+    }
+
+    async function loadPal(content){
+      colors = console.log(content.split('\n'));
+    }
+  </script>
+</body>
+</html>

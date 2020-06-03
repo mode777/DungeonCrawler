@@ -35,6 +35,27 @@ class Vec4 {
   static zero(){
     return [0,0,0,0]
   }
+
+  static add(a,b,dst){
+    dst[0] = a[0]+b[0]
+    dst[1] = a[1]+b[1]
+    dst[2] = a[2]+b[2]
+    dst[3] = a[3]+b[3]
+  }
+
+  static divV(a,v,dst){
+    dst[0] = a[0]/v
+    dst[1] = a[1]/v
+    dst[2] = a[2]/v
+    dst[3] = a[3]/v
+  }
+
+  static equals(a,b){
+    return a[0] == b[0] &&
+    a[1] == b[1] &&
+    a[2] == b[2] &&
+    a[3] == b[3]
+  }
 }
 
 class Vec3 {
@@ -158,6 +179,14 @@ class Vec3 {
 
   static dot(a,b){
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+  }
+
+  static distance2(a,b){
+    return (a[0] - b[0]).pow(2) + (a[1] - b[1]).pow(2) + (a[2] - b[2]).pow(2)
+  }
+
+  static distance(a,b){
+    return distance2(a,b).sqrt
   }
 }
 

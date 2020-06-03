@@ -227,6 +227,18 @@ static void Buffer_readDoubleVec_2(WrenVM* vm){
   } 
 }
 
+static void Buffer_readString_2(WrenVM* vm){
+  PGLBuffer* buffer = *(PGLBuffer**)wrenGetSlotForeign(vm, 0);
+  int offset = (int)wrenGetSlotDouble(vm, 1);
+  int size = (int)wrenGetSlotDouble(vm, 2);
+  pgl_check_bounds_vec(char, offset, size)
+  // cut null terminator
+  if(buffer->data[offset+size-1] == 0){
+    size -= 1;
+  }
+  wrenSetSlotBytes(vm, 0, (buffer->data+offset), size);
+}
+
 static void Buffer_writeByte_2(WrenVM* vm){
   PGLBuffer* buffer = *(PGLBuffer**)wrenGetSlotForeign(vm, 0);
   int offset = (int)wrenGetSlotDouble(vm, 1);

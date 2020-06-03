@@ -18,8 +18,10 @@ void main(){
   float d = dot(vNormal, lightDir);
   float x = (d + 1.0) / 2.0;
   float y = vTexcoord.y;
+  float offset = vTexcoord.x - 0.5;
 
-  vec4 color = texture2D(uTexture, vec2(x,y));
+
+  vec4 color = texture2D(uTexture, vec2(x+offset,y));
 
   varColor = color;
   //varColor = vec4(normalize(vNormal),1.0) + vec4(vColor*0.0);

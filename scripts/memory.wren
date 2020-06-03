@@ -8,6 +8,14 @@ class ListUtil {
     return -1
   }
 
+  static selectMany(list,fn){
+    return list.reduce([]) {|p,c|
+      var l =fn.call(c).toList
+      p = p + l
+      return p 
+    }
+  }
+
   static first(list, fn){
     for(e in list){
       if(fn.call(e)) return e
@@ -40,6 +48,16 @@ class BufferView {
   buffer { _buffer }
   offset { _offset }
   size { _size }
+
+  construct fromBufferView(view, offset, size){
+    _buffer = view.buffer
+    offset = offset + view.offset
+    if(_buffer.size < offset+size){
+      Fiber.abort("View outside buffer bounds")
+    }
+    _offset = offset
+    _size = size
+  }
 
   construct new(buffer, offset, size){
     _buffer = buffer
@@ -105,7 +123,7 @@ foreign class Buffer {
   foreign getSize()
 
   foreign copyFrom(buffer, srcOffset, srcSize, dstOffset)
-
+  foreign readString(offset, size)
   foreign readByte(offset)
   foreign readShort(offset)
   foreign readInt(offset)

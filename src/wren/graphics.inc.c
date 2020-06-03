@@ -4,24 +4,46 @@
 #include <modules/memory.h>
 
 static void Texture_allocate(WrenVM* vm){
-  PGLTexture** wrenHandle = pgl_wren_new(vm, PGLTexture*);
+  GLuint* wrenHandle = pgl_wren_new(vm, GLuint);
   pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Allocated Texture %p", wrenHandle);
   *wrenHandle = NULL;
 }
 
 static void Texture_finalize(void* data){
   pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Free Texture %p", data);
-  PGLTexture* texture = *(PGLTexture**)data;
-  pglTextureDelete(texture);
+  glDeleteTextures(1, (GLuint*)data);
 }
 
 static void Texture_image_1(WrenVM* vm){
-  PGLTexture** handle = ((PGLTexture**)wrenGetSlotForeign(vm, 0));
+  GLuint* handle = ((GLuint*)wrenGetSlotForeign(vm, 0));
   PGLImage* img = *((PGLImage**)wrenGetSlotForeign(vm, 1));
   
-  PGLTexture* texture = pglTextureFromMemory(img->pixels, img->width, img->height, img->channels); 
+  GLuint texture = pglTextureFromMemory(img->pixels, img->width, img->height, img->channels); 
 
   *handle = texture;
+}
+
+static void Texture_minFilter_1(WrenVM* vm){
+  GLuint handle = *((GLuint*)wrenGetSlotForeign(vm, 0));
+  GLenum para = (GLenum)wrenGetSlotDouble(vm, 1);
+  glBindTexture(GL_TEXTURE_2D, handle);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, para);
+}
+
+static void Texture_magFilter_1(WrenVM* vm){
+  GLuint handle = *((GLuint*)wrenGetSlotForeign(vm, 0));
+  GLenum para = (GLenum)wrenGetSlotDouble(vm, 1);
+  glBindTexture(GL_TEXTURE_2D, handle);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, para);
+}
+
+static void Texture_wrap_2(WrenVM* vm){
+  GLuint handle = *((GLuint*)wrenGetSlotForeign(vm, 0));
+  GLenum s = (GLenum)wrenGetSlotDouble(vm, 1);
+  GLenum t = (GLenum)wrenGetSlotDouble(vm, 2);
+  glBindTexture(GL_TEXTURE_2D, handle);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
 }
 
 static void GraphicsBuffer_allocate(WrenVM* vm){

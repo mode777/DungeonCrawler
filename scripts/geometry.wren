@@ -51,6 +51,8 @@ class GeometryData {
 
     var newAccessors = {}
     var stride = refItem.vertexSize()
+    
+
     var offset = 0
 
     for(attrType in refItem){
@@ -90,14 +92,16 @@ class GeometryData {
         indices[indexOffset + i] = gd.indices[i] + vertexOffset
       }
       indexOffset = indexOffset + gd.indices.count
-      vertexOffset = vertexOffset + acc.count
+      vertexOffset = vertexOffset + gd.positions.count
     }
-
     return GeometryData.new(newAccessors, indices)
   }
 
   indices { _indices }
   count { _attributes.count }
+  colors { this[AttributeType.Color] }
+  positions { this[AttributeType.Position] }
+  texcoords { this[AttributeType.Texcoord0] }
   
   construct new(attributes, indices){
     _attributes = attributes

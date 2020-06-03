@@ -18,6 +18,22 @@ inline static void set_vec3(WrenVM* vm, int listSlot, int listIndex, int slot, f
   }
 }
 
+inline static void get_vec(WrenVM* vm, int listSlot, int listIndex, int slot, float* out, int size){
+  for (int i = 0; i < size; i++)
+  {
+    wrenGetListElement(vm, listSlot, listIndex+i, slot);
+    out[i] = (float)wrenGetSlotDouble(vm, slot);
+  }
+}
+
+inline static void set_vec(WrenVM* vm, int listSlot, int listIndex, int slot, float* in, int size){
+  for (int i = 0; i < size; i++)
+  {
+    wrenSetSlotDouble(vm, slot, (double)in[i]);
+    wrenSetListElement(vm, listSlot, listIndex+i, slot);
+  }
+}
+
 static void Mat4_allocate(WrenVM* vm){
   float* handle = pgl_wren_new(vm, mat4);
   pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Allocated matrix4 %p", handle);

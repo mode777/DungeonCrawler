@@ -5,11 +5,6 @@
 #include <GLES2/gl2.h>
 #include <cglm/cglm.h>
 
-typedef struct {
-  GLuint handle;
-  int refCount;
-} PGLTexture;
-
 typedef struct { 
   GLuint buffer;
   unsigned int type;
@@ -39,9 +34,7 @@ const char* pglGetGlErrorString(GLenum const err);
 void pglCheckGlErrorImpl(const char* fname, int line);
 #define pglCheckGlError() pglCheckGlErrorImpl(__FILE__,__LINE__)
 
-PGLTexture* pglTextureFromMemory(void* pixels, int width, int height, int channels);
-PGLTexture* pglTextureTake(PGLTexture* texture);
-void pglTextureDelete(PGLTexture* texture);
+GLuint pglTextureFromMemory(void* pixels, int width, int height, int channels);
 
 PGLProgram* pglProgramCreate(const char *vertShaderSrc, const char *fragShaderSrc);
 void pglProgramDelete(PGLProgram* p);

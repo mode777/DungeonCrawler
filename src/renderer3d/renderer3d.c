@@ -72,6 +72,30 @@ void pglSetUniformVec3(int type, float* v3){
   glUniform3fv(location, 1, v3);
 }
 
+void pglSetUniformVec2(int type, float* v2){
+  CHECKPROG;
+
+  int location = program->uniforms[type];
+
+  if(location == -1){
+    pglLog(PGL_MODULE_RENDERER, PGL_LOG_DEBUG, "Unknown uniform %i", type);
+    return;
+  }
+  glUniform2fv(location, 1, v2);
+}
+
+void pglSetUniformf(int type, float f){
+  CHECKPROG;
+
+  int location = program->uniforms[type];
+
+  if(location == -1){
+    pglLog(PGL_MODULE_RENDERER, PGL_LOG_DEBUG, "Unknown uniform %i", type);
+    return;
+  }
+  glUniform1f(location, f);
+}
+
 void pglSetUniformi(int type, int i){
   CHECKPROG;
 

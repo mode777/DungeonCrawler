@@ -4,6 +4,7 @@ import "image" for Image
 import "memory" for ListUtil, Buffer, BufferView, Float32Array, Accessor, DataType, ByteVecAccessor, UByteVecAccessor, ShortVecAccessor, UShortVecAccessor, IntVecAccessor, UIntVecAccessor, FloatVecAccessor, ByteAccessor, UByteAccessor, ShortAccessor, UShortAccessor, IntAccessor, UIntAccessor, FloatAccessor
 import "geometry" for GeometryData, AttributeType
 import "graphics" for Geometry, Mesh, Texture, DiffuseMaterial
+import "stream" for StreamReader
 import "math" for Mat4
 
 class Gltf {
@@ -35,25 +36,62 @@ class Gltf {
   materials { _materials }
   nodes { _nodes }
   scenes { _scenes }
+  images { _images }
 
   construct fromFile(filename){
+    if(filename.endsWith(".gltf")){
+      loadGltf(filename)
+    } else if(filename.endsWith(".glb")){
+      loadGlb(filename)
+    } 
+  }
+
+  loadGlb(filename){
+    _buffer = Buffer.fromFile(filename)
+    _reader = StreamReader.new(_buffer)
+    var magic = _reader.readString(4)
+    if(magic != "glTF"){
+      Fiber.abort("Not a GLB file")
+    }
+    var version = _reader.readUInt()
+    var size = _reader.readUInt()
+
+    var len = _reader.readUInt()
+    var type = _reader.readString(4)
+    _json = Json.parse(_reader.readString(len))
+    len = _reader.readUInt()
+    type = _reader.readString(4)
+
+    _buffers = [BufferView.new(_buffer, _reader.offset, len)]
+
+    loadAssets()
+
+    _json = null
+  }
+
+  loadGltf(filename){
     var file = File.open(filename, "rb")
     var content = file.readToEnd()
     file.close()
     _json = Json.parse(content)
     
     getFolder(filename)
-    loadImages()
+    
     loadBuffers()
-    loadTextures()
-    loadViews()
-    loadAccessors()
-    loadMeshes()
-    loadMaterials()
-    loadNodes()
-    loadScenes()
+    loadAssets()
 
     _json = null
+  }
+
+  loadAssets(){
+    loadViews()
+    loadImages()
+    loadTextures()
+    loadMaterials()
+    loadAccessors()
+    loadMeshes()
+    loadNodes()
+    loadScenes()
   }
 
   getFolder(filename){
@@ -67,14 +105,21 @@ class Gltf {
     if(_json["images"] == null) return
 
     for (image in _json["images"]) {
-      _images.add(Image.fromFile(_folder + "/" + image["uri"]))
+      if(image["uri"]){
+        _images.add(Image.fromFile(_folder + "/" + image["uri"]))
+      } else {
+        var img = Image.fromBufferView(_views[image["bufferView"]])
+        _images.add(img)
+      }
     }
   }
 
   loadBuffers(){
     _buffers = []
     for(buffer in _json["buffers"]){
-      _buffers.add(Buffer.fromFile(_folder + "/" + buffer["uri"]))
+      var buffer = Buffer.fromFile(_folder + "/" + buffer["uri"])
+      var view = BufferView.new(buffer, 0, buffer.size)
+      _buffers.add(view)
     }
   }
 
@@ -95,7 +140,7 @@ class Gltf {
       var offset = view["byteOffset"]
       var size = view["byteLength"]
       var stride = view["stride"] || 0
-      _views.add(BufferView.new(buffer, offset, size))
+      _views.add(BufferView.fromBufferView(buffer, offset, size))
     }
   }
 
@@ -125,14 +170,7 @@ class Gltf {
     for(mesh in _json["meshes"]){
       var primitives = []
       for(prim in mesh["primitives"]){
-        var index = _accessors[prim["indices"]]
-        //var material = _materials[prim["material"]]
-        var attributes = {}
-        for(key in prim["attributes"].keys){
-          var aType= Gltf.attributeType(key)
-          attributes[aType] =  _accessors[prim["attributes"][key]]
-        }
-        primitives.add(GeometryData.new(attributes, index))
+        primitives.add(GltfPrimitive.fromJson(this,prim))
       }
       _meshes.add(GltfMesh.fromJson(this, primitives, mesh))
     }    
@@ -195,27 +233,47 @@ class GltfTexture {
   }
 }
 
-class GltfMesh {
-  
-  name { _name }
-  primitives { _primitives }
-  material { _material }
+class GltfPrimitive {
 
-  construct fromJson(gltf, primitives, json){
-    _primitives = primitives
-    _name = json["name"]
+  material { _material }
+  geometryData { _gd }
+
+  construct fromJson(gltf, json){
+    var indices = gltf.accessors[json["indices"]]
+    //var material = _materials[prim["material"]]
+    var attributes = {}
+    for(key in json["attributes"].keys){
+      var aType= Gltf.attributeType(key)
+      attributes[aType] =  gltf.accessors[json["attributes"][key]]
+    }
+    _gd = GeometryData.new(attributes,indices)
+
     var i = json["material"]
     if(i) _material = gltf.materials[i]
   }
 
+  toGeometry(){
+    return Geometry.new(_gd)
+  }
+
+}
+
+class GltfMesh {
+  
+  name { _name }
+  primitives { _primitives }
+
+  construct fromJson(gltf, primitives, json){
+    _primitives = primitives
+    _name = json["name"]
+  }
+
   toGraphicsMeshes(){
-    var mat = _material ? _material.toGraphicsMaterial() : null
-    return _primitives.map {|x| Mesh.new(Geometry.new(x),mat) }.toList
+    return _primitives.map {|x| Mesh.new(x.toGeometry(), x.material ? x.material.toGraphicsMaterial() : null) }.toList
   }
 
   toGraphicsMeshes(transform){
-    var mat = _material ? _material.toGraphicsMaterial() : null
-    return _primitives.map {|x| Mesh.new(Geometry.new(x),mat, transform) }.toList
+    return _primitives.map {|x| Mesh.new(x.toGeometry(), x.material ? x.material.toGraphicsMaterial() : null, transform) }.toList
   }
 }
 

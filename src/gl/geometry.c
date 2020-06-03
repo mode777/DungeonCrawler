@@ -1,6 +1,6 @@
 #include <modules/gl.h>
 
-PGLTexture* pglTextureFromMemory(void* pixels, int width, int height, int channels){
+GLuint pglTextureFromMemory(void* pixels, int width, int height, int channels){
   GLuint texture;
   glGenTextures(1, &texture);
 
@@ -10,26 +10,8 @@ PGLTexture* pglTextureFromMemory(void* pixels, int width, int height, int channe
   glGenerateMipmap(GL_TEXTURE_2D);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   
-  PGLTexture* wrapper = calloc(1, sizeof(PGLTexture));
-  wrapper->handle = texture;
-
-  return pglTextureTake(wrapper);
-}
-
-PGLTexture* pglTextureTake(PGLTexture* texture){
-  texture->refCount++;
   return texture;
 }
-
-void pglTextureDelete(PGLTexture* texture){
-  texture->refCount--;
-  if(texture->refCount < 1){
-    pglLog(PGL_MODULE_GL, PGL_LOG_DEBUG, "Destroy texture %i", texture->handle);
-    glDeleteTextures(1, &texture->handle);
-    free(texture);
-  }
-}
-
 
 
 

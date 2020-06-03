@@ -128,6 +128,64 @@ class PointAtCamera is PerspectiveCamera {
   }
 }
 
+class OrbitCamera is PointAtCamera {
+  
+  phi { Math.deg(_phi) }
+  phi=(v) { 
+    _phi = Math.rad(v)
+    _dirty = true
+  }
+  theta { Math.deg(_theta) }
+  theta=(v) { 
+    _theta = Math.rad(v) 
+    _dirty = true
+  }
+  radius { _rad }
+  radius=(v) { 
+    _rad = v
+    _dirty = true 
+  }
+
+  construct new(){
+    super()
+    _dirty = true
+    _position = [0,0,0]
+    _target = [0,0,0]
+    _phi = Math.rad(90)
+    _theta = 0
+    _rad = 1
+  }
+  
+  getView(){
+    if(_dirty){
+      super.getTarget(_target)
+      _position[0] = _rad * _phi.sin * _theta.cos
+      _position[1] = _rad * _phi.cos
+      _position[2] = _rad * _phi.sin * _theta.sin
+      Vec3.add(_position,_target,_position)
+      super.setPosition(_position)
+      _dirty = false
+    }
+    return super.getView()
+  }
+
+  phi(v){
+    _phi = _phi + Math.rad(v)
+    _dirty = true
+  }
+
+  theta(v){
+    _theta = _theta + Math.rad(v)
+    _dirty = true
+  }
+
+  radius(v){
+    _rad = _rad + v
+    _dirty = true
+  }
+
+}
+
 class FlyCamera is PointAtCamera {
 
   yaw { Math.deg(_yaw) }
