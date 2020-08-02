@@ -26,18 +26,18 @@ Augur.describe("Gltf") {
     Renderer.checkErrors()
   }
 
-  Augur.it("should create meshes"){
-    var gltf = Gltf.fromFile("./tests/gltf/stone2.gltf") 
-    var meshes = gltf.meshes[0].toGraphicsMeshes()
-    Renderer.checkErrors()
-  }
+  // Augur.it("should create meshes"){
+  //   var gltf = Gltf.fromFile("./tests/gltf/stone2.gltf") 
+  //   var meshes = gltf.meshes[0].toGraphicsMeshes()
+  //   Renderer.checkErrors()
+  // }
 
-  Augur.it("should create meshes"){
-    var gltf = Gltf.fromFile("./tests/gltf/three.gltf") 
-    var meshes = gltf.scene("Scene").toGraphicsMeshes()
-    Assert.equal(meshes.count, 4)
-    Renderer.checkErrors()
-  }
+  // Augur.it("should create meshes"){
+  //   var gltf = Gltf.fromFile("./tests/gltf/three.gltf") 
+  //   var meshes = gltf.scene("Scene").toGraphicsMeshes()
+  //   Assert.equal(meshes.count, 4)
+  //   Renderer.checkErrors()
+  // }
 
   Augur.it("should load from binary file") {
     var glb = Gltf.fromFile("./tests/gltf/out.glb")

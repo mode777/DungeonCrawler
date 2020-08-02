@@ -30,9 +30,16 @@ static void Renderer_drawIndices_1(WrenVM* vm){
   pglIndicesDraw(indices);
 }
 
+static void Renderer_drawIndices_2(WrenVM* vm){
+  PGLVertexIndices* indices = (PGLVertexIndices*)wrenGetSlotForeign(vm, 1);
+  int count = (int)wrenGetSlotDouble(vm, 2);
+  pglIndicesDrawi(indices,count);
+}
+
 static void Renderer_setUniformMat4_2(WrenVM* vm){
   int type = (int)wrenGetSlotDouble(vm, 1);
   float* mat = (float*)wrenGetSlotForeign(vm, 2);
+  if(mat == NULL) pgl_wren_runtime_error(vm, "Mat4 is null");
   pglSetUniformMat4(type, mat);
 }
 
@@ -40,7 +47,7 @@ static void Renderer_setUniformVec3_2(WrenVM* vm){
   int type = (int)wrenGetSlotDouble(vm, 1);
   vec3 v;
   get_vec(vm, 2,0,0, v,3);
-  pglSetUniformVec2(type, v);
+  pglSetUniformVec3(type, v);
 }
 
 
@@ -65,7 +72,12 @@ static void Renderer_setProgram_1(WrenVM* vm){
 static void Renderer_setUniformTexture_3(WrenVM* vm){
   int type = (int)wrenGetSlotDouble(vm,1);
   int unit = (int)wrenGetSlotDouble(vm,2);
+  if(wrenGetSlotType(vm, 3) == WREN_TYPE_NULL) { 
+    pgl_wren_runtime_error(vm, "Texture is null");
+    return;
+  }
   GLuint texture = *(GLuint*)wrenGetSlotForeign(vm, 3);
+
   pglSetTextureUnit(unit, texture);
   pglSetUniformi(type, unit);
 }
@@ -75,4 +87,20 @@ static void Renderer_setBackgroundColor_3(WrenVM* vm){
   float g = (float)wrenGetSlotDouble(vm,2);
   float b = (float)wrenGetSlotDouble(vm,3);
   glClearColor(r, g, b, 1.0);
+}
+
+static void Renderer_toggleFeature_2(WrenVM* vm){
+  GLenum cap = (GLenum)wrenGetSlotDouble(vm,1);
+  bool on = wrenGetSlotBool(vm, 2);
+  if(on){
+    glEnable(cap);
+  } else {
+    glDisable(cap);
+  }
+}
+
+static void Renderer_blendFunc_2(WrenVM* vm){
+  GLenum src = (GLenum)wrenGetSlotDouble(vm,1);
+  GLenum dst = (GLenum)wrenGetSlotDouble(vm,2);
+  glBlendFunc(src,dst);
 }

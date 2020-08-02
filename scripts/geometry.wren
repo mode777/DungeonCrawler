@@ -8,6 +8,7 @@ class AttributeType {
   static Tangent { 4 }
   static Texcoord0 { 5 }
   static Texcoord1 { 6 }
+  static Offset { 7 }
 }
 
 class GeometryWriter {

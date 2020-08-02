@@ -1,12 +1,29 @@
 class Math {
   static rad(deg){ deg * 0.01745329252 }
   static deg(rad){ rad / 0.01745329252 }
+  static min(a,b) { a < b ? a : b }
+  static max(a,b) { a < b ? b : a }
+  static clamp(low,high,val) { Math.min(Math.max(val, low), high) }
 }
 
 class Vec2 {
+
+  static zero(dst){
+    dst[0] = 0
+    dst[1] = 0
+  }
+
+  static zero(){
+    return [0,0]
+  }
+
   static copy(a,b){
     b[0] = a[0]
     b[1] = a[1] 
+  }
+
+  static clone(a){
+    return [a[0],a[1]]
   }
 
   static add(a,b,dest){
@@ -14,11 +31,54 @@ class Vec2 {
     dest[1] = a[1] + b[1]
   }
 
+  static add(a,x,y,dest){
+    dest[0] = a[0] + x
+    dest[1] = a[1] + y
+  }
+
+  static addV(a,v,dest){
+    dest[0] = a[0] + v
+    dest[1] = a[1] + v
+  }
+
   static sub(a,b,dest){
     dest[0] = a[0] - b[0]
     dest[1] = a[1] - b[1]
   }
+
+  static set(x,y, dest){
+    dest[0] = x
+    dest[1] = y
+  }
+
+  static floor(src,dst){
+    dst[0] = src[0].floor
+    dst[1] = src[1].floor
+  }
+
+  static frac(src,dst){
+    dst[0] = src[0] - src[0].floor
+    dst[1] = src[1] - src[1].floor
+  }
+
+  static mul(a,b,dst){
+    dst[0] = a[0] * b[0]
+    dst[1] = a[1] * b[1]
+  }
+
+  static mulV(a,v,dst){
+    dst[0] = a[0] * v
+    dst[1] = a[1] * v
+  }
+
+  static sign(src,dst){
+    dst[0] = src[0] > 0 ? 1 : (src[0] < 0 ? -1 : 0)
+    dst[1] = src[1] > 0 ? 1 : (src[1] < 0 ? -1 : 0)
+  }
+
 }
+
+
 
 class Vec4 {
   static create(x,y,z,w){
@@ -30,6 +90,13 @@ class Vec4 {
     dst[1] = 0
     dst[2] = 0
     dst[3] = 0
+  }
+
+  static copy(src, dst){
+    dst[0] = src[0] 
+    dst[1] = src[1] 
+    dst[2] = src[2] 
+    dst[3] = src[3] 
   }
 
   static zero(){
@@ -50,11 +117,32 @@ class Vec4 {
     dst[3] = a[3]/v
   }
 
+  static mulV(a,v,dst){
+    dst[0] = a[0]*v
+    dst[1] = a[1]*v
+    dst[2] = a[2]*v
+    dst[3] = a[3]*v
+  }
+
   static equals(a,b){
     return a[0] == b[0] &&
     a[1] == b[1] &&
     a[2] == b[2] &&
     a[3] == b[3]
+  }
+
+  static set(x,y,z,w,dst){
+    dst[0] = x 
+    dst[1] = y 
+    dst[2] = z 
+    dst[3] = w 
+  }
+
+  static clampV(src,v,dest){
+    dest[0] = Math.min(src[0],v)
+    dest[1] = Math.min(src[1],v)
+    dest[2] = Math.min(src[2],v)
+    dest[3] = Math.min(src[3],v)
   }
 }
 
@@ -67,6 +155,10 @@ class Vec3 {
 
   static zero(){
     return [0,0,0]
+  }
+
+  static clone(src){
+    return [src[0],src[1],src[2]]
   }
 
   static one(dst){
@@ -83,6 +175,12 @@ class Vec3 {
     dst[0] = x
     dst[1] = y
     dst[2] = z
+  }
+
+  static set(src,dst){
+    dst[0] = src[0]
+    dst[1] = src[1]
+    dst[2] = src[0]
   }
 
   static copy(src,dst){
@@ -113,6 +211,18 @@ class Vec3 {
     dst[0] = a[0] * v
     dst[1] = a[1] * v
     dst[2] = a[2] * v
+  }
+
+  static div(a,b,dst){
+    dst[0] = a[0] / b[0]
+    dst[1] = a[1] / b[1]
+    dst[2] = a[2] / b[2]
+  }
+
+  static divV(a, v, dst){
+    dst[0] = a[0] / v
+    dst[1] = a[1] / v
+    dst[2] = a[2] / v
   }
 
   static sub(v1, v2, dst){
@@ -213,6 +323,7 @@ foreign class Mat4 {
   foreign invert()
   foreign transpose()
   foreign perspective(fov, near, far)
+  foreign ortho()
 }
 
 class Noise {

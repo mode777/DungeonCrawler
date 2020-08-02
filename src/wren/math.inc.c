@@ -160,6 +160,12 @@ static void Mat4_perspective_3(WrenVM* vm){
   glm_perspective(fov, vp[2]/vp[3], near, far, m);
 }
 
+static void Mat4_ortho_0(WrenVM* vm){
+  float* m = wrenGetSlotForeign(vm, 0);
+  float* vp = pgl3DGetViewport();
+  glm_ortho(vp[0],vp[2],vp[3], vp[1], 0,1,m);
+}
+
 static void Mat4_lookAt_3(WrenVM* vm){
   float* m = wrenGetSlotForeign(vm, 0);
   vec3 eye, target, up;

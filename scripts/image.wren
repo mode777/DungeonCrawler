@@ -31,6 +31,7 @@ foreign class Image {
   foreign setPixel(x, y, r, g, b, a)
   foreign setPixel(x, y, vec4)
   foreign getPixel(x, y, vec4)
+  foreign getPixelInt(x,y)
   foreign save(filename)
 
   foreign getWidth()

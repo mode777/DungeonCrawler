@@ -83,7 +83,7 @@ void main(){
   vec4 world = uModel * vec4(vPosition,1.0);
   float z = mix(snoise(world.xz/16.0),snoise(world.xz/32.0), 0.75);
   vec4 position = uProjection * uView * world;
-  position.y += z*5.0;
+  position.y += z*3.0;
 
   //color = vColor;
   varPos = world.xyz;

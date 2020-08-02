@@ -7,6 +7,8 @@ import "./tests/geometry.spec"
 import "./tests/graphics.spec"
 import "./tests/gltf.spec"
 import "./tests/math.spec"
+import "./tests/font.spec"
+import "./tests/perf.spec"
 
 Application.onLoad {
   //Application.logLevel(Severity.Debug)

@@ -82,7 +82,7 @@ uniform sampler2D uTexture;
 
 void main(){
 
-  vec4 color = texture2D(uTexture, varTexcoord);
+  vec4 color = texture2D(uTexture, varTexcoord, -1.0);
   //vec4 color = varColor;
 
   // fog
@@ -108,6 +108,6 @@ void main(){
   // vec3 diffuse = diff * vec3(1.0);  // Light color
   // color = color * vec4(diffuse, 1.0);
 
-  gl_FragColor = mix(vec4(1.0,1.0,1.0,1.0), color * (1.0-volume), fogFactor);
+  gl_FragColor = mix(vec4(1.0,1.0,1.0,1.0), color * (1.0-volume), 1.0);
 }
 

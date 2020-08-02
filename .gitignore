@@ -1,7 +1,7 @@
 *.bc
 *.o
 *.exe
-make-web.sh
 .vs
 .vscode
 copy.sh
+assets_old

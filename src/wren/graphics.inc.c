@@ -3,10 +3,15 @@
 #include <modules/image.h>
 #include <modules/memory.h>
 
+typedef struct {
+  GLuint handle;
+  int width;
+  int height;
+} PGLTexture;
+
 static void Texture_allocate(WrenVM* vm){
-  GLuint* wrenHandle = pgl_wren_new(vm, GLuint);
+  PGLTexture* wrenHandle = pgl_wren_new(vm, PGLTexture);
   pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Allocated Texture %p", wrenHandle);
-  *wrenHandle = NULL;
 }
 
 static void Texture_finalize(void* data){
@@ -15,12 +20,22 @@ static void Texture_finalize(void* data){
 }
 
 static void Texture_image_1(WrenVM* vm){
-  GLuint* handle = ((GLuint*)wrenGetSlotForeign(vm, 0));
+  PGLTexture* txt = ((PGLTexture*)wrenGetSlotForeign(vm, 0));
   PGLImage* img = *((PGLImage**)wrenGetSlotForeign(vm, 1));
   
-  GLuint texture = pglTextureFromMemory(img->pixels, img->width, img->height, img->channels); 
+  txt->handle = pglTextureFromMemory(img->pixels, img->width, img->height, img->channels); 
+  txt->width = img->width;
+  txt->height = img->height;
+}
 
-  *handle = texture;
+static void Texture_width_0(WrenVM* vm){
+  PGLTexture* txt = ((PGLTexture*)wrenGetSlotForeign(vm, 0));
+  wrenSetSlotDouble(vm, 0, (double)txt->width);
+}
+
+static void Texture_height_0(WrenVM* vm){
+  PGLTexture* txt = ((PGLTexture*)wrenGetSlotForeign(vm, 0));
+  wrenSetSlotDouble(vm, 0, (double)txt->height);
 }
 
 static void Texture_minFilter_1(WrenVM* vm){
@@ -46,8 +61,19 @@ static void Texture_wrap_2(WrenVM* vm){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
 }
 
+static void Texture_createMipmaps_0(WrenVM* vm){
+  GLuint handle = *((GLuint*)wrenGetSlotForeign(vm, 0));
+  glBindTexture(GL_TEXTURE_2D, handle);
+  glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+typedef struct {
+  GLuint handle;
+  GLenum target;
+} PGLGraphicsBuffer;
+
 static void GraphicsBuffer_allocate(WrenVM* vm){
-  GLuint* handle = pgl_wren_new(vm, GLuint);
+  PGLGraphicsBuffer* handle = pgl_wren_new(vm, PGLGraphicsBuffer);
   pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Allocated GBuffer %p", handle);
   glGenBuffers(1, handle);
 }
@@ -57,15 +83,26 @@ static void GraphicsBuffer_finalize(void* data){
   glDeleteBuffers(1, (GLuint*)data);
 }
 
-static void GraphicsBuffer_init_4(WrenVM* vm){
-  GLuint glBuffer = *(GLuint*)wrenGetSlotForeign(vm, 0);
+static void GraphicsBuffer_init_5(WrenVM* vm){
+  PGLGraphicsBuffer* glBuffer = (PGLGraphicsBuffer*)wrenGetSlotForeign(vm, 0);
   PGLBuffer* pglBuffer = *(PGLBuffer**)wrenGetSlotForeign(vm, 1);
   int offset = (int)wrenGetSlotDouble(vm, 2);
   GLsizeiptr size= (GLsizeiptr)wrenGetSlotDouble(vm, 3);
-  GLenum target = wrenGetSlotBool(vm, 4) ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
+  glBuffer->target = wrenGetSlotBool(vm, 4) ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER; 
 
-  glBindBuffer(target, glBuffer);
-  glBufferData(target, size, (void*)((pglBuffer->data) + offset), GL_STATIC_DRAW);
+  glBindBuffer(glBuffer->target, glBuffer->handle);
+  glBufferData(glBuffer->target, size, (void*)((pglBuffer->data) + offset), GL_STATIC_DRAW);
+}
+
+static void GraphicsBuffer_subData_4(WrenVM* vm){
+  PGLGraphicsBuffer glBuffer = *(PGLGraphicsBuffer*)wrenGetSlotForeign(vm, 0);
+  PGLBuffer* pglBuffer = *(PGLBuffer**)wrenGetSlotForeign(vm, 1);
+  int offset = (int)wrenGetSlotDouble(vm, 2);
+  GLsizeiptr size= (GLsizeiptr)wrenGetSlotDouble(vm, 3);
+  int toffset = (int)wrenGetSlotDouble(vm, 4);
+
+  glBindBuffer(glBuffer.target, glBuffer.handle);
+  glBufferSubData(glBuffer.target, toffset, size, (void*)((pglBuffer->data) + offset));
 }
 
 static void InternalAttribute_allocate(WrenVM* vm){

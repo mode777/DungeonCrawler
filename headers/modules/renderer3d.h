@@ -11,6 +11,7 @@ float* pgl3DGetViewport();
 
 void pglAttributeEnable(PGLAttribute* attr);
 void pglIndicesDraw(PGLVertexIndices* idx);
+void pglIndicesDrawi(PGLVertexIndices* idx, int count);
 void pglSetUniformMat4(int type, float* mat);
 void pglSetUniformVec3(int type, float* v3);
 void pglSetUniformVec2(int type, float* v2);

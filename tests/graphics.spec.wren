@@ -9,6 +9,8 @@ Augur.describe("Texture") {
   Augur.it("should create from image") {
     var img = Image.new(128,128)
     var text = Texture.fromImage(img)
+    Assert.equal(128, text.width)
+    Assert.equal(128, text.height)
   }
 
   Augur.it("should create from file") {

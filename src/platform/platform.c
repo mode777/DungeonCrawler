@@ -100,45 +100,15 @@ void pglRegisterCallbacks(PGLPlatformCallbacks* callbacks){
 }
 
 SDL_bool quit = SDL_FALSE;
-SDL_Event event;
 Uint64 now = 0;
 Uint64 last = 0;
 double delta = 0;
 
 static void platform_update(){
-  while(SDL_PollEvent(&event))
-  {
-    switch(event.type){
-      case SDL_QUIT: {
-        quit = SDL_TRUE;
-        break;
-      }
-      case SDL_MOUSEMOTION: {
-        if(platform.mouseMove != NULL){
-          (*platform.mouseMove)(event.motion.x, event.motion.y);
-        }
-        break;
-      }
-      case SDL_KEYDOWN: {
-        if(platform.keyDown != NULL){
-          (*platform.keyDown)(SDL_GetKeyName(event.key.keysym.sym));
-        }
-        break;
-      }
-      case SDL_KEYUP: {
-        if(platform.keyUp != NULL){
-          (*platform.keyUp)(SDL_GetKeyName(event.key.keysym.sym));
-        }
-      }
-    }      
-  }
-
   last = now;
   now = SDL_GetPerformanceCounter();
   delta = (double)((now - last) / (double)SDL_GetPerformanceFrequency() );
   
-  //printf("%f\n", delta);
-
   if(platform.update != NULL){
     (*platform.update)(delta);
   }

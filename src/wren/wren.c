@@ -56,6 +56,9 @@ static WrenForeignMethodFn bindMethodFunc(
   bool isStatic, 
   const char* signature) 
 {
+  if(strcmp(module, "random") == 0 || strcmp(module, "meta") == 0){
+    return NULL;
+  }
   char* fullName = getMethodName(module, className, isStatic, signature);
   WrenForeignMethodFn func = shget(bindings, fullName);
   if(func == NULL){
@@ -70,6 +73,11 @@ WrenForeignClassMethods bindClassFunc(
   const char* module, 
   const char* className)
 {
+  if(strcmp(module, "random") == 0 || strcmp(module, "meta") == 0){
+    WrenForeignClassMethods wfcm ={0};
+    return wfcm;
+  }
+
   char* fullName = getClassName(module, className);
   
   int index = shgeti(classBindings, fullName);
@@ -162,18 +170,18 @@ static void shutdown(){
   pglLog(PGL_MODULE_WREN, PGL_LOG_INFO, "Shutting down Wren VM");
   wrenFreeVM(vm);
   vm = NULL;
-  
+  pglQuit();  
 } 
 
-void pglRunWrenFile(const char* module, const char* file){
+bool pglRunWrenFile(const char* module, const char* file){
   if(vm == NULL)
-    return;
+    return false;
 
   char* content = pglFileReadAllText(file);
 
   if(content == NULL){
     pglLog(PGL_MODULE_WREN, PGL_LOG_ERROR, "Script file not found: %s", file);
-    return;
+    return false;
   }
   pglLog(PGL_MODULE_WREN, PGL_LOG_INFO, "Loaded module %s (%s)", module, file);
 
@@ -182,12 +190,15 @@ void pglRunWrenFile(const char* module, const char* file){
       module,
       content);
 
+
   free(content);
 
   if(result != WREN_RESULT_SUCCESS){
     shutdown();
-    return;
+    return false;
   }
+
+  return true;
 }
 
 void pglCallWrenUpdate(double delta){

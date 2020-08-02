@@ -47,6 +47,12 @@ void pglIndicesDraw(PGLVertexIndices* i) {
   glDrawElements(GL_TRIANGLES, idx.count, idx.componentType, 0);
 }
 
+void pglIndicesDrawi(PGLVertexIndices* i, int count) {
+  PGLVertexIndices idx = *i;
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idx.buffer);
+  glDrawElements(GL_TRIANGLES, count, idx.componentType, 0);
+}
+
 void pglSetUniformMat4(int type, float* mat){
   CHECKPROG;
 

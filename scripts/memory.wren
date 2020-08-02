@@ -1,3 +1,15 @@
+
+class MapUtil {
+  static merge(from, to){
+    for(k in from.keys){
+      if(!to.containsKey(k)){
+        to[k] = from[k]
+      }
+    }
+    return to
+  }
+}
+
 class ListUtil {
   static indexOf(list, item) {
     for(i in 0...list.count){
@@ -22,6 +34,16 @@ class ListUtil {
     }
   }
 
+  static filter(list, fn){
+    var l = []
+    for(e in list){
+      if(fn.call(e)){
+        l.add(e)
+      }
+    }
+    return l
+  }
+
   static mapUnique(list, fn){
     var visited = []
     var generated = []
@@ -40,6 +62,89 @@ class ListUtil {
     }
 
     return out
+  }
+}
+
+class Grid {
+
+  width { _w }
+  height { _h }
+  count { _data.count }
+
+  construct new(w,h, def, seed){
+    init(w,h,def,seed)
+  }
+
+  construct new(w,h, def){
+    init(w,h,def,null)
+  }
+
+  construct new(w,h){
+    init(w,h,null, null)
+  }
+
+  init(w,h,default,seed){
+    _w = w
+    _h = h
+    _default = default
+    _seed = seed
+    _neighbours = List.filled(4, null)
+    clear()
+  }
+
+  clear(){
+    _data = List.filled(_w*_h, _seed)
+  }
+
+  [i] {
+    return _data[i]
+  }
+
+  [i]=(v) {
+    _data[i] = v
+  }
+
+  [x,y] {
+    if(isOutOfBounds(x,y)) return _default
+    return _data[y*_w+x]
+  }
+
+  [x,y]=(v) {
+    if(isOutOfBounds(x,y)) return
+    _data[y*_w+x] = v
+  }
+
+  isOutOfBounds(x,y){
+    return y < 0 || y >= _h || x < 0 || x >= _w
+  }
+
+  neighbours(x,y){
+    //if((x<0||x>=_w)||(y<0||y>=_h)) Fiber.abort("Argument out of range")
+    //up
+    _neighbours[0] = this[x+1,y] 
+    _neighbours[1] = this[x-1,y]
+    _neighbours[2] = this[x,y-1] 
+    _neighbours[3] = this[x,y+1] 
+    return _neighbours 
+  }
+
+  iterate(val) { _data.iterate(val)  }
+  iteratorValue(val) { _data.iteratorValue(val) }
+
+  fill(fn) {
+    for(y in 0..._h){
+      for(x in 0..._w){
+        this[x,y] = fn.call(x,y)
+      }
+    }
+  }
+
+  forEachXY(fn){
+    for(y in 0..._h){
+      for(x in 0..._w){
+        fn.call(x,y,this[x,y])
+      }
+    }
   }
 }
 

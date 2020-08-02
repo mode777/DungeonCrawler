@@ -9,6 +9,43 @@ class Camera {
   }
 }
 
+class OrthograficCamera is Camera {
+  construct new(){
+    _projection = Mat4.new()
+    _view = Mat4.new()
+    _pDirty = true
+    //_vDirty = true
+  }
+
+  getProjection(){
+    if(_pDirty){
+      _projection.ortho()
+      _pDirty = false
+    }
+    return _projection
+  }
+
+  getView(){
+    return _view
+  }
+
+  move(x,y){
+    _view.translate(x,y,0)
+  }
+
+  scale(x,y){
+    _view.scale(x,y)
+  }
+
+  rotate(r){
+    _view.rotateZ(z)
+  }
+
+  reset(){
+    _view.identity()
+  }
+}
+
 class PerspectiveCamera is Camera {
   
   fov { Math.deg(_fov) }
@@ -25,7 +62,7 @@ class PerspectiveCamera is Camera {
 
   far { _far }
   far=(v) {
-    _pDirty = textures
+    _pDirty = true
     _far = v
   }
 
@@ -184,6 +221,16 @@ class OrbitCamera is PointAtCamera {
     _dirty = true
   }
 
+  setTarget(x,y,z){
+    super.setTarget(x,y,z)
+    _dirty = true
+  }
+
+  setTarget(v3){
+    super.setTarget(v3)
+    _dirty = true
+  }
+
 }
 
 class FlyCamera is PointAtCamera {
@@ -209,7 +256,7 @@ class FlyCamera is PointAtCamera {
     super()
     _worldUp = [0,1,0]
     _yaw = Math.rad(270)
-    _pitch = Math.rad(-45)
+    _pitch = Math.rad(0)
 
     _front = Vec3.zero()
     _right = Vec3.zero()
@@ -221,6 +268,7 @@ class FlyCamera is PointAtCamera {
     Vec3.mulV(_front, amnt, _tmp)
     super.movePosition(_tmp)
     super.moveTarget(_tmp)
+    _dirty = true
   }
 
   pitch(p){
@@ -237,6 +285,7 @@ class FlyCamera is PointAtCamera {
     Vec3.mulV(_right, amnt, _tmp)
     super.movePosition(_tmp)
     super.moveTarget(_tmp)
+    _dirty = true
   }
 
   getView(){

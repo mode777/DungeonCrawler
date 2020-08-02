@@ -21,7 +21,9 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("platform.Window.config(_,_,_)", Window_config_3);
   pgl_wren_bind_method("platform.Application.logLevel(_)", Application_logLevel_1);
   pgl_wren_bind_method("platform.Application.logLevel(_,_)", Application_logLevel_2);
+  pgl_wren_bind_method("platform.Application.pollEvent(_)", Application_pollEvent_1);
   pgl_wren_bind_method("platform.Application.quit()", Application_quit_0);
+  pgl_wren_bind_method("platform.Application.loadModuleInternal(_,_)", Application_loadModule_2);
   pgl_wren_bind_method("platform.Mouse.getPosition(_)", Mouse_getPosition_1);
   pgl_wren_bind_method("platform.Mouse.setPosition(_,_)", Mouse_setPosition_2);
 
@@ -30,6 +32,18 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("io.File.length()", File_length_0);
   pgl_wren_bind_method("io.File.close()", File_close_0);
   pgl_wren_bind_method("io.File.read(_)", File_read_1);
+  pgl_wren_bind_method("io.File.readString(_)", File_readString_1);
+  pgl_wren_bind_method("io.File.pos()", File_pos_0);
+  pgl_wren_bind_method("io.File.readUByte()", File_readUByte_0);
+  pgl_wren_bind_method("io.File.readByte()", File_readByte_0);
+  pgl_wren_bind_method("io.File.readUShort()", File_readUShort_0);
+  pgl_wren_bind_method("io.File.readShort()", File_readShort_0);
+  pgl_wren_bind_method("io.File.readUInt()", File_readUint_0);
+  pgl_wren_bind_method("io.File.readInt()", File_readInt_0);
+  pgl_wren_bind_method("io.File.readFloat()", File_readFloat_0);
+  pgl_wren_bind_method("io.File.readDouble()", File_readDouble_0);
+  pgl_wren_bind_method("io.File.seek(_,_)", File_seek_2);
+
 
   //json
   pgl_wren_bind_class("json.JsonParser", JSONParser_allocate, JSONParser_finalize);
@@ -47,6 +61,7 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("image.Image.setPixel(_,_,_,_,_,_)", Image_setPixel_6);
   pgl_wren_bind_method("image.Image.setPixel(_,_,_)", Image_setPixel_3);
   pgl_wren_bind_method("image.Image.getPixel(_,_,_)", Image_getPixel_3);
+  pgl_wren_bind_method("image.Image.getPixelInt(_,_)", Image_getPixelInt_2);
   pgl_wren_bind_method("image.Image.save(_)", Image_save_1);
   pgl_wren_bind_method("image.Image.getWidth()", Image_getWidth_0);
   pgl_wren_bind_method("image.Image.getHeight()", Image_getHeight_0);
@@ -66,6 +81,7 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("math.Mat4.project(_)", Mat4_project_1);
   pgl_wren_bind_method("math.Mat4.unproject(_)", Mat4_unproject_1);
   pgl_wren_bind_method("math.Mat4.perspective(_,_,_)", Mat4_perspective_3);
+  pgl_wren_bind_method("math.Mat4.ortho()", Mat4_ortho_0);
   pgl_wren_bind_method("math.Mat4.lookAt(_,_,_)", Mat4_lookAt_3);
   pgl_wren_bind_method("math.Mat4.transpose()", Mat4_transpose_0);
   pgl_wren_bind_method("math.Mat4.invert()", Mat4_invert_0);
@@ -75,17 +91,22 @@ void pgl_wren_bind_api(){
   //graphics
   pgl_wren_bind_class("graphics.Texture", Texture_allocate, Texture_finalize);
   pgl_wren_bind_method("graphics.Texture.image(_)", Texture_image_1);
+  pgl_wren_bind_method("graphics.Texture.width()", Texture_width_0);
+  pgl_wren_bind_method("graphics.Texture.height()", Texture_height_0);
   pgl_wren_bind_method("graphics.Texture.magFilter(_)", Texture_magFilter_1);
   pgl_wren_bind_method("graphics.Texture.minFilter(_)", Texture_minFilter_1);
   pgl_wren_bind_method("graphics.Texture.wrap(_,_)", Texture_wrap_2);
+  pgl_wren_bind_method("graphics.Texture.createMipmaps()", Texture_createMipmaps_0);
   pgl_wren_bind_class("graphics.GraphicsBuffer", GraphicsBuffer_allocate, GraphicsBuffer_finalize);
-  pgl_wren_bind_method("graphics.GraphicsBuffer.init(_,_,_,_)", GraphicsBuffer_init_4);
+  pgl_wren_bind_method("graphics.GraphicsBuffer.init(_,_,_,_,_)", GraphicsBuffer_init_5);
+  pgl_wren_bind_method("graphics.GraphicsBuffer.subData(_,_,_,_)", GraphicsBuffer_subData_4);
   pgl_wren_bind_class("graphics.InternalAttribute", InternalAttribute_allocate, InternalAttribute_finalize);
   pgl_wren_bind_class("graphics.InternalVertexIndices", InternalVertexIndices_allocate, InternalVertexIndices_finalize);
   pgl_wren_bind_method("graphics.Renderer.getErrors()", Renderer_getErrors_0);
   pgl_wren_bind_method("graphics.Renderer.setViewport(_,_,_,_)", Renderer_setViewport_4);
   pgl_wren_bind_method("graphics.Renderer.enableAttributeInternal(_)", Renderer_enableAttribute_1);
   pgl_wren_bind_method("graphics.Renderer.drawIndicesInternal(_)", Renderer_drawIndices_1);
+  pgl_wren_bind_method("graphics.Renderer.drawIndicesInternal(_,_)", Renderer_drawIndices_2);
   pgl_wren_bind_method("graphics.Renderer.setUniformMat4(_,_)", Renderer_setUniformMat4_2);
   pgl_wren_bind_method("graphics.Renderer.setUniformVec3(_,_)", Renderer_setUniformVec3_2);
   pgl_wren_bind_method("graphics.Renderer.setUniformVec2(_,_)", Renderer_setUniformVec2_2);
@@ -93,6 +114,8 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("graphics.Renderer.setShaderInternal(_)", Renderer_setProgram_1);
   pgl_wren_bind_method("graphics.Renderer.setUniformTexture(_,_,_)", Renderer_setUniformTexture_3);
   pgl_wren_bind_method("graphics.Renderer.setBackgroundColor(_,_,_)", Renderer_setBackgroundColor_3);
+  pgl_wren_bind_method("graphics.Renderer.toggleFeature(_,_)", Renderer_toggleFeature_2);
+  pgl_wren_bind_method("graphics.Renderer.blendFunc(_,_)", Renderer_blendFunc_2);
   pgl_wren_bind_class("graphics.InternalShader", InternalShader_allocate, InternalShader_finalize);
   pgl_wren_bind_method("graphics.InternalShader.bindAttribute(_,_)", InternalShader_bindAttribute_2);
   pgl_wren_bind_method("graphics.InternalShader.bindUniform(_,_)", InternalShader_bindUniform_2);

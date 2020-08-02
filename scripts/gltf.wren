@@ -3,7 +3,7 @@ import "io" for File
 import "image" for Image
 import "memory" for ListUtil, Buffer, BufferView, Float32Array, Accessor, DataType, ByteVecAccessor, UByteVecAccessor, ShortVecAccessor, UShortVecAccessor, IntVecAccessor, UIntVecAccessor, FloatVecAccessor, ByteAccessor, UByteAccessor, ShortAccessor, UShortAccessor, IntAccessor, UIntAccessor, FloatAccessor
 import "geometry" for GeometryData, AttributeType
-import "graphics" for Geometry, Mesh, Texture, DiffuseMaterial
+import "graphics" for Geometry, Mesh, Texture, DiffuseMaterial, Node
 import "stream" for StreamReader
 import "math" for Mat4
 
@@ -95,6 +95,7 @@ class Gltf {
   }
 
   getFolder(filename){
+    filename = filename.replace("\\","/")
     var frags = filename.split("/")
     frags.removeAt(-1)
     _folder = frags.join("/")
@@ -271,10 +272,6 @@ class GltfMesh {
   toGraphicsMeshes(){
     return _primitives.map {|x| Mesh.new(x.toGeometry(), x.material ? x.material.toGraphicsMaterial() : null) }.toList
   }
-
-  toGraphicsMeshes(transform){
-    return _primitives.map {|x| Mesh.new(x.toGeometry(), x.material ? x.material.toGraphicsMaterial() : null, transform) }.toList
-  }
 }
 
 class GltfMaterial {
@@ -318,9 +315,9 @@ class GltfNode {
     return m
   }
 
-  toGraphicsMeshes(){
+  toGraphicsNodes(){
     if(_mesh){
-      return _mesh.toGraphicsMeshes(_transform)
+      return _mesh.toGraphicsMeshes().map{|m| Node.new(m, _transform)}.toList
     }
     return []
   }

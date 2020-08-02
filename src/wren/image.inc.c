@@ -97,6 +97,14 @@ static void Image_getPixel_3(WrenVM* vm){
   }
 }
 
+static void Image_getPixelInt_2(WrenVM* vm){
+  PGLImage* image = *(PGLImage**)wrenGetSlotForeign(vm, 0); 
+  int x = (int)wrenGetSlotDouble(vm, 1);
+  int y = (int)wrenGetSlotDouble(vm, 2);
+  unsigned int pixel = ((unsigned int*)image->pixels)[(y * image->width + x)];
+  wrenSetSlotDouble(vm, 0, (double)pixel);
+}
+
 static void Image_setPixel_3(WrenVM* vm){
   PGLImage* image = *(PGLImage**)wrenGetSlotForeign(vm, 0); 
   unsigned int x = (unsigned int)wrenGetSlotDouble(vm, 1);

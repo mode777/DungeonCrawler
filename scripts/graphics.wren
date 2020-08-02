@@ -2,15 +2,18 @@ import "image" for Image
 import "math" for Vec3, Mat4, Math
 import "io" for File
 import "geometry" for AttributeType
+import "memory" for MapUtil
 
 class Colors {
   static init() {
+    __transparent = [0,0,0,0]
     __white = [255,255,255,255]
     __grey = [128,128,128,255]
     __darkgrey = [64,64,64,255]
     __red = [255,0,0,255]
     __green = [0,255,0,255]
     __blue = [0,0,255,255]
+    __black = [0,0,0,255]
   }
   static White {__white}
   static Grey {__grey}
@@ -18,6 +21,8 @@ class Colors {
   static Red {__red}
   static Green {__green}
   static Blue {__blue}
+  static Transparent { __transparent }
+  static Black { __black }
 }
 
 class UniformType {
@@ -26,10 +31,14 @@ class UniformType {
   static Projection { 2 }
   static Normal { 3 }
   static Texture0 { 5 }
+  static Texture1 { 6 }
+  static Texture2 { 7 }
   // reserved
   static Light0 { 12 }
   // reserved
   static Time { 16 }
+  static TextureSize { 17 }
+  static FogColor { 18 }
 }
 
 class TextureFilters {
@@ -47,35 +56,92 @@ class TextureWrap {
   static Mirrored { 0x8370 }
 }
 
+var DefaultTextureOptions = {
+  "mipmaps": true,
+  "minFilter": TextureFilters.LinearMipmapLinear,
+  "magFilter": TextureFilters.Linear,
+  "wrapS": TextureWrap.Repeat,
+  "wrapT": TextureWrap.Repeat
+}
+
 foreign class Texture {
+
+  width { width() }
+  height { height() }
+
   construct fromImage(img){
     image(img)
+    init(DefaultTextureOptions)
+  }
+
+  construct fromImage(img, options){
+    image(img)
+    init(MapUtil.merge(DefaultTextureOptions, options))
   }
 
   construct fromFile(path){
     var img = Image.fromFile(path)
     image(img)
+    init(DefaultTextureOptions)
+  }
+
+    construct fromFile(path, options){
+    var img = Image.fromFile(path)
+    image(img)
+    init(MapUtil.merge(DefaultTextureOptions, options))
+  }
+
+  init(options){
+    magFilter(options["magFilter"])
+    minFilter(options["minFilter"])
+    wrap(options["wrapS"], options["wrapT"])
+    if(options["mipmaps"]){
+      createMipmaps()
+      minFilter(TextureFilters.LinearMipmapLinear)
+    }
   }
 
   foreign magFilter(filter)
   foreign minFilter(filter)
   foreign wrap(s,t)
+  foreign createMipmaps()
+  foreign width()
+  foreign height()
 
   // private
   foreign image(img)
 }
 
+class BufferUsage {
+  static Static { 0x88E4 }
+  static Dynamic { 0x88E8 }
+  static Stream { 0x88E0 }
+}
+
 foreign class GraphicsBuffer {
   construct forVertices(view){
-    init(view.buffer, view.offset, view.size, false)
+    init(view.buffer, view.offset, view.size, false, BufferUsage.Static)
+  }
+
+  construct forVertices(view, usage){
+    init(view.buffer, view.offset, view.size, false, usage)
   }
 
   construct forIndices(view){
-    init(view.buffer, view.offset, view.size, true)
+    init(view.buffer, view.offset, view.size, true, BufferUsage.Static)
+  }
+
+  construct forIndices(view, usage){
+    init(view.buffer, view.offset, view.size, true, usage)
   }
 
   //private
-  foreign init(buffer, offset, size, areIndices)
+  foreign init(buffer, offset, size, isIndexBuffer, usage)
+  foreign subData(buffer, offset, size, targetOffset)
+  subDataView(view){
+    subData(view.buffer, view.offset, view.size, 0)
+  }
+
 }
 
 foreign class InternalAttribute {
@@ -111,6 +177,37 @@ class VertexIndices {
   }
 }
 
+//Regex
+// Find: #define GL_([A-Z,_,2]+)\s+(.+)
+// Replace: static $1 { $2 }
+
+class RendererFeature {
+  static Texture2d { 0x0DE1 }
+  static CullFace { 0x0B44 }
+  static Blend { 0x0BE2 }
+  static Dither { 0x0BD0 }
+  static StencilTest { 0x0B90 }
+  static DepthTest { 0x0B71 }
+  static ScissorTest { 0x0C11 }
+  static PolygonOffsetFill { 0x8037 }
+  static SampleAlphaToCoverage { 0x809E }
+  static SampleCoverage { 0x80A0 }
+}
+
+class RendererBlendFunc {
+  static Zero { 0 }
+  static One { 1 }
+  static SrcColor { 0x0300 }
+  static OneMinusSrcColor { 0x0301 }
+  static SrcAlpha { 0x0302 }
+  static OneMinusSrcAlpha { 0x0303 }
+  static DstAlpha { 0x0304 }
+  static OneMinusDstAlpha { 0x0305 }
+  static DstColor { 0x0306 }
+  static OneMinusDstColor { 0x0307 }
+  static SrcAlphaSaturate { 0x0308 }
+}
+
 class Renderer {
   static shader{ __shader }
   foreign static getErrors()
@@ -118,11 +215,18 @@ class Renderer {
   foreign static setBackgroundColor(r,g,b)
   foreign static enableAttributeInternal(attr)
   static enableAttribute(attr) { 
+    if(attr == null) Fiber.abort("Attribute is null")
     Renderer.enableAttributeInternal(attr.internal) 
   }
   foreign static drawIndicesInternal(indices)
+  foreign static drawIndicesInternal(indices, count)
   static drawIndices(indices) { 
+    if(indices == null) Fiber.abort("Indices are null")
     Renderer.drawIndicesInternal(indices.internal) 
+  }
+  static drawIndices(indices,count) { 
+    if(indices == null) Fiber.abort("Indices are null")
+    Renderer.drawIndicesInternal(indices.internal, count) 
   }
   foreign static setUniformMat4(type, mat4)
   foreign static setShaderInternal(shaderInt)
@@ -135,6 +239,9 @@ class Renderer {
   foreign static setUniformVec2(type, vec2)
   foreign static setUniformFloat(type, f)
 
+  foreign static toggleFeature(feature,bool)
+  foreign static blendFunc(src, dst)
+
   static checkErrors(){
     var errors = Renderer.getErrors()
     if(errors.count > 0){
@@ -143,11 +250,23 @@ class Renderer {
   }
 
   static set2d(){
-    Renderer.setShader(Shader.default2d)
+    if(__shader != Shader.default2d){
+      Renderer.toggleFeature(RendererFeature.Blend, true)
+      Renderer.toggleFeature(RendererFeature.CullFace, false)
+      Renderer.toggleFeature(RendererFeature.DepthTest, false)
+      Renderer.setShader(Shader.default2d)
+      __shader = Shader.default2d
+    }
   }
 
   static set3d(){
-    Renderer.setShader(Shader.default3d)
+    if(__shader != Shader.default3d){
+      Renderer.toggleFeature(RendererFeature.Blend, false)
+      Renderer.toggleFeature(RendererFeature.CullFace, true)
+      Renderer.toggleFeature(RendererFeature.DepthTest, true)
+      Renderer.setShader(Shader.default3d)
+      __shader = Shader.default3d
+    }
   }
 }
 
@@ -196,25 +315,33 @@ class Geometry {
   }
 }
 
-class Mesh {
+class Node {
 
+  mesh { _mesh }
+  mesh=(v) { _mesh = v }
   transform { _transform }
-  geometry { _geometry }
 
-  construct new(geometry, material){
-    _geometry = geometry
-    _material = material
-    _transform = Mat4.new()
-  }
-
-  construct new(geometry, material, transform){
-    _geometry = geometry
-    _material = material
+  construct new(mesh, transform){
+    _mesh = mesh
     _transform = transform
   }
 
   draw(){
     Renderer.setUniformMat4(UniformType.Model, _transform)
+    if(_mesh) _mesh.draw()
+  }
+}
+
+class Mesh {
+
+  geometry { _geometry }
+
+  construct new(geometry, material){
+    _geometry = geometry
+    _material = material
+  }
+
+  draw(){
     if(_material) _material.use()
     _geometry.draw()
   }
@@ -243,10 +370,15 @@ class Shader {
       var mapping = {
         "attributes": {
           "vPosition": AttributeType.Position,
-          "vTexcoord": AttributeType.Texcoord0
+          "vTexcoord": AttributeType.Texcoord0,
+          "vColor": AttributeType.Color
         },
         "uniforms": {
           "uTexture": UniformType.Texture0,
+          "uProjection": UniformType.Projection,
+          "uModel": UniformType.Model,
+          "uView": UniformType.View,
+          "uTextureSize": UniformType.TextureSize
         }
       }
       __default2d = Shader.fromFiles("./shaders/2d.vertex.glsl","./shaders/2d.fragment.glsl", mapping)
@@ -305,6 +437,10 @@ class Shader {
         _internal.bindUniform(mapping["uniforms"][key], key)
       }
     }
+  }
+
+  enable(){
+    Renderer.setShader(this)
   }
 
 }
