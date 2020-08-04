@@ -38,7 +38,8 @@ static void Renderer_drawIndices_2(WrenVM* vm){
 
 static void Renderer_setUniformMat4_2(WrenVM* vm){
   int type = (int)wrenGetSlotDouble(vm, 1);
-  float* mat = (float*)wrenGetSlotForeign(vm, 2);
+  void* ptr = wrenGetSlotForeign(vm, 2);
+  float* mat = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   if(mat == NULL) pgl_wren_runtime_error(vm, "Mat4 is null");
   pglSetUniformMat4(type, mat);
 }

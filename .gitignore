@@ -5,3 +5,5 @@
 .vscode
 copy.sh
 assets_old
+main-linux
+main-rpi

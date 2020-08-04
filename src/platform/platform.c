@@ -75,17 +75,12 @@ PGLWindow* pglCreateWindow() {
   pglWindow->width = windowConfig.width;
   pglWindow->height = windowConfig.height;
 
-  #if defined(__arm__) && defined(__unix__)
+  #if defined(PGL_PLATFORM_RPI) || defined (EMSCRIPTEN)
   // raspberry
   initEgl(NULL);
-  #elif defined (EMSCRIPTEN)
-  // webassembly
-  initEgl(NULL);
-  #elif defined(__unix__)
-  // x86 linux
+  #elif defined(PGL_PLATFORM_LINUX)
   initEgl(systemInfo.info.x11.window);
-  #else
-  // windows
+  #elif defined(PGL_PLATFORM_WIN)
   initEgl(systemInfo.info.win.window);
   #endif
 

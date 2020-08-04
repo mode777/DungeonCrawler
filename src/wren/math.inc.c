@@ -35,7 +35,7 @@ inline static void set_vec(WrenVM* vm, int listSlot, int listIndex, int slot, fl
 }
 
 static void Mat4_allocate(WrenVM* vm){
-  float* handle = pgl_wren_new(vm, mat4);
+  char* handle = wrenSetSlotNewForeign(vm, 0, 0, sizeof(mat4)+16);
   pglLog(PGL_MODULE_WREN, PGL_LOG_DEBUG, "Allocated matrix4 %p", handle);
 }
 
@@ -45,12 +45,14 @@ static void Mat4_finalize(void* data){
 }
 
 static void Mat4_identity_0(WrenVM* vm){
-  float* mat = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* mat = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   glm_mat4_identity(mat);
 }
 
 static void Mat4_translate_3(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   vec3 v;
   v[0] = (float)wrenGetSlotDouble(vm, 1);
   v[1] = (float)wrenGetSlotDouble(vm, 2);
@@ -59,25 +61,32 @@ static void Mat4_translate_3(WrenVM* vm){
 }
 
 static void Mat4_rotateX_1(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   float angle = (float)wrenGetSlotDouble(vm, 1);
   glm_rotate_x(m, angle, m);
 }
 
 static void Mat4_rotateY_1(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
+
   float angle = (float)wrenGetSlotDouble(vm, 1);
   glm_rotate_y(m, angle, m);
 }
 
 static void Mat4_rotateZ_1(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
+
   float angle = (float)wrenGetSlotDouble(vm, 1);
   glm_rotate_z(m, angle, m);
 }
 
 static void Mat4_rotateQuat_4(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
+
   mat4 mat;
   float q[4];
   q[0] = (float)wrenGetSlotDouble(vm, 1);
@@ -89,7 +98,9 @@ static void Mat4_rotateQuat_4(WrenVM* vm){
 }
 
 static void Mat4_scale_3(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
+
   vec3 v;
   v[0] = (float)wrenGetSlotDouble(vm, 1);
   v[1] = (float)wrenGetSlotDouble(vm, 2);
@@ -98,19 +109,24 @@ static void Mat4_scale_3(WrenVM* vm){
 }
 
 static void Mat4_copy_1(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
+
   float* src = wrenGetSlotForeign(vm, 1);
   glm_mat4_copy(src, m);
 }
 
 static void Mat4_mul_1(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
+
   float* src = wrenGetSlotForeign(vm, 1);
   glm_mat4_mul(m, src, m);
 }
 
 static void Mat4_mulVec_1(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   int vectors = wrenGetListCount(vm, 1) / 3;
   for (size_t i = 0; i < vectors; i++)
   {
@@ -122,7 +138,8 @@ static void Mat4_mulVec_1(WrenVM* vm){
 }
 
 static void Mat4_project_1(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   int vectors = wrenGetListCount(vm, 1) / 3;
   for (size_t i = 0; i < vectors; i++)
   {
@@ -136,7 +153,8 @@ static void Mat4_project_1(WrenVM* vm){
 }
 
 static void Mat4_unproject_1(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   mat4 inv;
   glm_mat4_inv_fast(m,inv);
   int vectors = wrenGetListCount(vm, 1) / 3;
@@ -152,7 +170,8 @@ static void Mat4_unproject_1(WrenVM* vm){
 }
 
 static void Mat4_perspective_3(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   float fov = (float)wrenGetSlotDouble(vm, 1);
   float near = (float)wrenGetSlotDouble(vm, 2);
   float far = (float)wrenGetSlotDouble(vm, 3);
@@ -161,13 +180,15 @@ static void Mat4_perspective_3(WrenVM* vm){
 }
 
 static void Mat4_ortho_0(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   float* vp = pgl3DGetViewport();
   glm_ortho(vp[0],vp[2],vp[3], vp[1], 0,1,m);
 }
 
 static void Mat4_lookAt_3(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   vec3 eye, target, up;
   get_vec3(vm, 1, 0, 0, eye);
   get_vec3(vm, 2, 0, 0, target);
@@ -176,12 +197,14 @@ static void Mat4_lookAt_3(WrenVM* vm){
 }
 
 static void Mat4_transpose_0(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   glm_mat4_transpose(m);
 }
 
 static void Mat4_invert_0(WrenVM* vm){
-  float* m = wrenGetSlotForeign(vm, 0);
+  void* ptr = wrenGetSlotForeign(vm, 0);
+  float* m = (float*)(((size_t)ptr) + ((size_t)ptr)%16);
   glm_mat4_inv_fast(m,m);
 }
 

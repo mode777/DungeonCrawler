@@ -43,14 +43,16 @@ void initEgl(void* hwnd){
  EGLint attribList[] =
   {
       EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+      #if defined(PGL_PLATFORM_WASM) || defined(PGL_PLATFORM_RPI) || defined(PGL_PLATFORM_WIN)
       EGL_SURFACE_TYPE, EGL_SWAP_BEHAVIOR_PRESERVED_BIT,
+      #endif
       EGL_RED_SIZE,       5,
       EGL_GREEN_SIZE,     6,
       EGL_BLUE_SIZE,      5,
       EGL_ALPHA_SIZE,     EGL_DONT_CARE,
       EGL_DEPTH_SIZE,     8,
       EGL_STENCIL_SIZE,   1,
-      #ifndef _WIN32
+      #if defined(PGL_PLATFORM_WASM) || defined(PGL_PLATFORM_RPI)
       // ANGLE does not support multisampling this way
       EGL_SAMPLE_BUFFERS, 1,
       #endif
@@ -74,9 +76,10 @@ void initEgl(void* hwnd){
 
   EGLint surfaceAttributes[] = { EGL_NONE };
   eglSurface = eglCreateWindowSurface(eglDisplay, windowConfig, hwnd, surfaceAttributes);  
-	assert(eglSurface != EGL_NO_SURFACE);
+	printf("%s\n", eglGetErrorString(eglGetError()));
+  assert(eglSurface != EGL_NO_SURFACE);
 
-  #ifndef __EMSCRIPTEN__
+  #if defined(PGL_PLATFORM_RPI) || defined(PGL_PLATFORM_WIN)
 	// preserve the buffers on swap
 	result = eglSurfaceAttrib(eglDisplay, eglSurface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
 	assert(EGL_FALSE != result);
@@ -92,7 +95,7 @@ void initEgl(void* hwnd){
   else {
     pglLog(PGL_MODULE_PLATFORM, PGL_LOG_INFO, "EGL initialized");
   }
-}
+} 
 
 void pglPresent(){
   eglSwapBuffers(eglDisplay, eglSurface);

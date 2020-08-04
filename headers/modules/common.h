@@ -10,6 +10,15 @@
 #include <stdbool.h>
 #include <math.h>
 
+#if defined(__arm__) && defined(__unix__)
+#define PGL_PLATFORM_RPI
+#elif defined (_WIN32)
+#define PGL_PLATFORM_WIN
+#elif defined (EMSCRIPTEN)
+#define PGL_PLATFORM_WASM
+#elif defined(__unix__)
+#define PGL_PLATFORM_LINUX
+#endif
 
 typedef void * PGLHandle;
 typedef unsigned int PGLUHandle;
