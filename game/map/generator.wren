@@ -1,10 +1,11 @@
 import "math" for Mat4, Noise, Vec3, Vec4, Math
 import "image" for Image
 import "2d" for Tileset, AbstractBatch, SpriteBatch, Quad
-import "random" for Random
 import "container" for GlobalContainer
 import "graphics" for Colors
 import "memory" for Grid
+
+import "./game/map/random" for ProdGen
 
 GlobalContainer.registerInstance("MAP", {"map": null, "lights": []})
 GlobalContainer.registerFactory("GeneratorComponent"){|c| GeneratorComponent.new(c.resolve("MAP")) }
@@ -25,22 +26,6 @@ class GeneratorComponent {
 
   update(){}
 
-}
-
-class ProdGen {
-  construct new(seed){
-    _random = Random.new(seed)
-  }
-
-  construct new(){
-    _random = Random.new()
-  }
-
-  size(s, threshold){ _random.int(s-threshold*2) + threshold }
-  range(a,b,threshold){ a + size(b-a, threshold) }
-  color(){ [_random.int(255),_random.int(255),_random.int(255),255] }
-  float(s,e){ _random.float(s,e) }
-  select(list){ list[_random.int(list.count)] }
 }
 
 class SplitDir {

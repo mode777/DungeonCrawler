@@ -37,7 +37,13 @@ Make sure not to run it from the win32 directory directly as the game will look 
 I'm using MinGW32
 ```
 mingw32-make main.exe
+cp main.exe win32
 ```
+Or just run
+```
+./make.sh
+```
+
 ### Raspberry PI
 ```
 make main
