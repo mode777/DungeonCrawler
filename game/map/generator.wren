@@ -3,9 +3,11 @@ import "image" for Image
 import "2d" for Tileset, AbstractBatch, SpriteBatch, Quad
 import "container" for GlobalContainer
 import "graphics" for Colors
-import "memory" for Grid
 
 import "./game/map/random" for ProdGen
+import "./game/map/map" for LevelMap, LevelElement
+import "./game/map/entity" for Light, Enemy, Item
+import "./game/map/graph" for Node, SplitDir, Connection
 
 GlobalContainer.registerInstance("MAP", {"map": null, "lights": []})
 GlobalContainer.registerFactory("GeneratorComponent"){|c| GeneratorComponent.new(c.resolve("MAP")) }
@@ -26,113 +28,6 @@ class GeneratorComponent {
 
   update(){}
 
-}
-
-class SplitDir {
-  static H { 0 }
-  static V { 1 }
-}
-
-class Connection {
-
-  x { _pos[0] }
-  y { _pos[1] }
-  a { _r1 }
-  b { _r2 }
-
-  construct new(r1, r2, pos){
-    _r1 = r1
-    _r2 = r2
-    _pos = pos
-  }
-}
-
-class Node {
-  
-  isLeaf { !_a && !_b }
-  quad { _q }
-  left { _a }
-  right { _b }
-  w { _q.w }
-  h { _q.h }
-  x { _q.x }
-  y { _q.y }
-  splitDir { _d }
-  connections { _connections }
-  
-  construct new(q){
-    _q = q
-    _connections = []
-  }
-
-  split(pg, threshold){
-    if(_q.w >= _q.h){
-      _a = Node.new(Quad.new(_q.x,_q.y,pg.size(_q.w, threshold), _q.h))
-      _b = Node.new(Quad.new(_q.x+_a.w,_q.y,_q.w-_a.w,_q.h))
-      _d = SplitDir.H
-    } else {
-      _a = Node.new(Quad.new(_q.x,_q.y,_q.w, pg.size(_q.h, threshold)))
-      _b = Node.new(Quad.new(_q.x,_q.y+_a.h,_q.w,_q.h-_a.h))
-      _d = SplitDir.V
-    }
-  }
-
-  addConnection(c){
-    _connections.add(c)
-  }
-
-  findLeavesLeft(){
-    if(_d == SplitDir.H){
-      return findLeavesLeft(_b.x, _d)
-    } else {
-      return findLeavesLeft(_b.y, _d)
-    }    
-  }
-
-  findLeavesLeft(coord, dir){
-    if(isLeaf){
-      if(dir == SplitDir.H && _q.x+_q.w == coord){
-        return [this]
-      } else if(dir == SplitDir.V && _q.y+_q.h == coord) {
-        return [this]
-      } else {
-        return []
-      }
-    } else {
-      return _a.findLeavesLeft(coord,dir) + _b.findLeavesLeft(coord,dir)
-    }
-  }
-
-  findLeavesRight(){
-    if(_d == SplitDir.H){
-      return findLeavesRight(_b.x, _d)
-    } else {
-      return findLeavesRight(_b.y, _d)
-    }
-  }
-
-  findLeavesRight(coord, dir){
-    if(isLeaf){
-      if(dir == SplitDir.H && _q.x == coord){
-        return [this]
-      } else if(dir == SplitDir.V && _q.y == coord) {
-        return [this]
-      } else {
-        return []
-      }
-    } else {
-      return _a.findLeavesRight(coord,dir) + _b.findLeavesRight(coord,dir)
-    }
-  }
-
-  center(){
-    return [_q.x+(_q.w/2).floor, _q.y+(_q.h/2).floor]
-  }
-
-  getLeaves(){
-    if(isLeaf) return [this]
-    return _a.getLeaves + _b.getLeaves
-  }
 }
 
 class MapGen {
@@ -180,6 +75,9 @@ class MapGen {
 
   generate(){
     split(_root)
+    var n = _root.leafAt(0,0)
+    n.collectNeighbours(_root)
+    System.print(n.neighbours)
     connect(_root)
     paint(_root)
   }
@@ -310,110 +208,3 @@ class MapGen {
   }  
 }
 
-var Wall_
-var Floor_
-var Door_
-
-class LevelElement {
-
-  static Wall { Wall_ }
-  static Floor { Floor_ }
-  static Door { Door_ }
-
-  sprite { _sprite }
-  isSolid { _flags & SOLID > 0 }
-  isPassable { _flags & PASSABLE > 0 }
-  isDoor { _flags & DOOR > 0 }
-  flags { _flags }
-  offset { _offset }
-  
-  construct new(flags, sprite){
-    _flags = flags
-    _sprite = sprite
-    _offset = 0
-  }
-
-  construct new(flags, sprite, offset){
-    _flags = flags
-    _sprite = sprite
-    _offset = offset
-  }
-}
-
-var NONE = 0
-var SOLID = 1 << 0
-var PASSABLE = 1 << 1
-var DOOR = 1 << 2
-
-Wall_ = LevelElement.new(SOLID, "wall_a")
-Floor_ = LevelElement.new(PASSABLE, "floor_checker")
-Door_ = LevelElement.new(SOLID | PASSABLE | DOOR, "door_a", 0.1)
-
-class LevelMap is Grid {
-  construct new(w,h){
-    super(w, h, LevelElement.Wall, LevelElement.Wall)
-  }
-
-}
-
-class Entity {
-
-  x { _x }
-  y { _y }
-
-  construct new(x,y){
-    _x = x
-    _y = y
-    _tags = {}
-  }
-
-  [key] {
-    return _tags[key]
-  }
-
-  [key]=(v) {
-    _tags[key] = v
-  }
-
-  move(x,y){
-    _x = _x + x
-    _y = _y + y
-  }
-
-  pos(x,y){
-    _x = x
-    _y = y
-  }
-}
-
-class Light is Entity {
-
-  color { _color }
-  intensity { _intensity }
-
-  construct new(x,y,color,intensity){
-    super(x,y)
-    _color = color
-    _intensity = intensity
-  }
-}
-
-class Enemy is Entity {
-
-  type { _type }
-
-  construct new(x,y,type){
-    super(x,y)
-    _type = type
-  }
-}
-
-class Item is Entity {
-
-  type { _type }
-
-  construct new(x,y,type){
-    super(x,y)
-    _type = type
-  }
-}

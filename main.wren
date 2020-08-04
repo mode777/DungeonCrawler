@@ -1,8 +1,8 @@
 import "platform" for Application, Severity, Window
 import "./game/index"
 
-var width = 1280
-var height = 720
+var width = 640
+var height = 400
 
 Application.onInit {|args|
   //Application.logLevel(Severity.Debug)

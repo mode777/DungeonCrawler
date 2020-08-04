@@ -1,4 +1,3 @@
-
 import "random" for Random
 
 class ProdGen {
