@@ -99,17 +99,19 @@ class Node {
   }
 
   leafAt(x,y){
-    if(!isInside(x,y)) return null
+    if(!isInside(x,y)) {
+      return null
+    }
     if(isLeaf) return this
 
     if(_d == SplitDir.H){
-      if(x < (this.x + this.w)) {
+      if(x < (_b.x)) {
         return _a.leafAt(x,y)
       } else {
         return _b.leafAt(x,y)
       }
     } else {
-      if(y < (this.y + this.h)) {
+      if(y < (_b.y)) {
         return _a.leafAt(x,y)
       } else {
         return _b.leafAt(x,y)
@@ -154,5 +156,9 @@ class Node {
   getLeaves(){
     if(isLeaf) return [this]
     return _a.getLeaves() + _b.getLeaves()
+  }
+
+  toString {
+    return "%(isLeaf ? "Leaf" : "Tree") at %(x),%(y) (%(w),%(h))"
   }
 }

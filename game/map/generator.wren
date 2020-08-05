@@ -75,54 +75,82 @@ class MapGen {
 
   generate(){
     split(_root)
-    var n = _root.leafAt(0,0)
+    
+    var n = _root.leafAt(10,10)
     n.collectNeighbours(_root)
+    
+
+    // n.collectNeighbours(_root)
     System.print(n.neighbours)
     connect(_root)
     paint(_root)
   }
 
   connect(n){
-    if(n.isLeaf) return
-
-    if(n.left.isLeaf && n.right.isLeaf) {
-      connectAdjacent(n)
-      return
-    }    
-
-    var left =  n.findLeavesLeft()
-    var right = n.findLeavesRight()
-    
-    for(rl in left){
-      for(rr in right){
-        if(n.splitDir == SplitDir.H){
-          var start = Math.max(rl.y, rr.y) + 1
-          var end = Math.min(rl.y+rl.h, rr.y+rr.h)
+    var ls = n.getLeaves()
+    for(l in ls){
+      l.collectNeighbours(n)
+      for(n in l.neighbours){
+        if(n.x == l.x+l.w){
+          var start = Math.max(l.y, n.y) + 1
+          var end = Math.min(l.y+l.h, n.y+n.h)
           var size = end-start
           if(size > 0){
             var y = start + _pg.size(size, 1)
-            var x = rr.x
-            var con = Connection.new(rl, rr, [x,y])
-            rl.addConnection(con)
-            rr.addConnection(con)
-          }
-        } else {
-          var start = Math.max(rl.x, rr.x) + 1
-          var end = Math.min(rl.x+rl.w, rr.x+rr.w)
-          var size = end-start
-          if(size > 0){
-            var x = start + _pg.size(size, 1)
-            var y = rr.y
-            var con = Connection.new(rl, rr, [x,y])
-            rl.addConnection(con)
-            rr.addConnection(con)
+            var x = l.x
+            var con = Connection.new(l, n, [x,y])
+            l.addConnection(con)
+            n.addConnection(con)
           }
         }
+        if(l.x == n.x+n.w){
+
+        }
+
       }
     }
 
-    connect(n.left)
-    connect(n.right)
+
+    // if(n.isLeaf) return
+
+    // if(n.left.isLeaf && n.right.isLeaf) {
+    //   connectAdjacent(n)
+    //   return
+    // }    
+
+    // var left =  n.findLeavesLeft()
+    // var right = n.findLeavesRight()
+    
+    // for(rl in left){
+    //   for(rr in right){
+    //     if(n.splitDir == SplitDir.H){
+    //       var start = Math.max(rl.y, rr.y) + 1
+    //       var end = Math.min(rl.y+rl.h, rr.y+rr.h)
+    //       var size = end-start
+    //       if(size > 0){
+    //         var y = start + _pg.size(size, 1)
+    //         var x = rr.x
+    //         var con = Connection.new(rl, rr, [x,y])
+    //         rl.addConnection(con)
+    //         rr.addConnection(con)
+    //       }
+    //     } else {
+    //       var start = Math.max(rl.x, rr.x) + 1
+    //       var end = Math.min(rl.x+rl.w, rr.x+rr.w)
+    //       var size = end-start
+    //       if(size > 0){
+    //         var x = start + _pg.size(size, 1)
+    //         var y = rr.y
+    //         var con = Connection.new(rl, rr, [x,y])
+    //         rl.addConnection(con)
+    //         rr.addConnection(con)
+    //       }
+    //     }
+    //   }
+    //}
+
+    // connect(n.left)
+    // connect(n.right)
   }
 
   connectAdjacent(n){

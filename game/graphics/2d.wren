@@ -20,7 +20,7 @@ class Gfx2dComponent {
   }
 
   start(){
-    _scale = 8
+    _scale = 4
     _cam = OrthograficCamera.new()
     _target = Vec3.zero()
     load()
