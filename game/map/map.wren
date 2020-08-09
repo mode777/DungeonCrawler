@@ -1,4 +1,5 @@
 import "memory" for Grid
+import "./game/map/entity" for Entity
 
 var Wall_
 var Floor_
@@ -40,8 +41,34 @@ Floor_ = LevelElement.new(PASSABLE, "floor_checker")
 Door_ = LevelElement.new(SOLID | PASSABLE | DOOR, "door_a", 0.1)
 
 class LevelMap is Grid {
-  construct new(w,h){
-    super(w, h, LevelElement.Wall, LevelElement.Wall)
+
+  root { _root }
+
+  construct new(root){
+    super(root.w, root.h, LevelElement.Wall, LevelElement.Wall)
+    _root = root
   }
 
+
+}
+
+class Room {
+
+  node { _node }
+  x { _node.x }
+  y { _node.y }
+  w { _node.w }
+  h { _node.h }
+
+  construct new(node){
+    _node = node
+  }
+
+  fillMap(m){
+    for(y in y+1...y+h-1){
+      for(x in x+1...x+w-1){
+        m[x,y] = LevelElement.Floor
+      }
+    }
+  }
 }

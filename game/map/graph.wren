@@ -1,4 +1,5 @@
 import "2d" for Quad
+import "./game/map/map" for Room
 
 class SplitDir {
   static H { 0 }
@@ -32,70 +33,33 @@ class Node {
   splitDir { _d }
   connections { _connections }
   neighbours { _neighbours }
+  room { _room }
   
-  construct new(q){
+  construct root(q){
     _q = q
+    _root = this
+  }
+
+  construct new(q, root){
+    _q = q
+    _root = root
     _connections = []
   }
 
   split(pg, threshold){
     if(_q.w >= _q.h){
-      _a = Node.new(Quad.new(_q.x,_q.y,pg.size(_q.w, threshold), _q.h))
-      _b = Node.new(Quad.new(_q.x+_a.w,_q.y,_q.w-_a.w,_q.h))
+      _a = Node.new(Quad.new(_q.x,_q.y,pg.size(_q.w, threshold), _q.h), _root)
+      _b = Node.new(Quad.new(_q.x+_a.w,_q.y,_q.w-_a.w,_q.h), _root)
       _d = SplitDir.H
     } else {
-      _a = Node.new(Quad.new(_q.x,_q.y,_q.w, pg.size(_q.h, threshold)))
-      _b = Node.new(Quad.new(_q.x,_q.y+_a.h,_q.w,_q.h-_a.h))
+      _a = Node.new(Quad.new(_q.x,_q.y,_q.w, pg.size(_q.h, threshold)), _root)
+      _b = Node.new(Quad.new(_q.x,_q.y+_a.h,_q.w,_q.h-_a.h), _root)
       _d = SplitDir.V
     }
   }
 
   addConnection(c){
     _connections.add(c)
-  }
-
-  findLeavesLeft(){
-    if(_d == SplitDir.H){
-      return findLeavesLeft(_b.x, _d)
-    } else {
-      return findLeavesLeft(_b.y, _d)
-    }    
-  }
-
-  findLeavesLeft(coord, dir){
-    if(isLeaf){
-      if(dir == SplitDir.H && _q.x+_q.w == coord){
-        return [this]
-      } else if(dir == SplitDir.V && _q.y+_q.h == coord) {
-        return [this]
-      } else {
-        return []
-      }
-    } else {
-      return _a.findLeavesLeft(coord,dir) + _b.findLeavesLeft(coord,dir)
-    }
-  }
-
-  findLeavesRight(){
-    if(_d == SplitDir.H){
-      return findLeavesRight(_b.x, _d)
-    } else {
-      return findLeavesRight(_b.y, _d)
-    }
-  }
-
-  findLeavesRight(coord, dir){
-    if(isLeaf){
-      if(dir == SplitDir.H && _q.x == coord){
-        return [this]
-      } else if(dir == SplitDir.V && _q.y == coord) {
-        return [this]
-      } else {
-        return []
-      }
-    } else {
-      return _a.findLeavesRight(coord,dir) + _b.findLeavesRight(coord,dir)
-    }
   }
 
   leafAt(x,y){
@@ -119,9 +83,9 @@ class Node {
     }
   }
 
-  collectDown(graph, cx, cy){
+  collectDown(cx, cy){
     while(cy < (y+h)){
-      var n = graph.leafAt(cx, cy)
+      var n = _root.leafAt(cx, cy)
       System.print([cx,cy])
       if(n == null) break
       cy = n.y + n.h
@@ -129,22 +93,21 @@ class Node {
     }
   }
 
-  collectRight(graph, cx, cy){
+  collectRight(cx, cy){
     while(cx < (x+w)){
-      var n = graph.leafAt(cx, cy)
+      var n = _root.leafAt(cx, cy)
       if(n == null) break
       cx = n.x + n.w
       _neighbours.add(n)
     }
   }
 
-  collectNeighbours(graph){
+  collectNeighbours(){
     _neighbours = []
-    System.print([x,y,w,h])
-    collectDown(graph,x-1,y)
-    collectDown(graph,x+w,y)
-    collectRight(graph,x, y-1)
-    collectRight(graph,x, y+h)
+    collectDown(x-1,y)
+    collectDown(x+w,y)
+    collectRight(x, y-1)
+    collectRight(x, y+h)
   } 
 
   isInside(x,y){x >= this.x && x < (this.x + this.w) && y >= this.y && y < (this.y + this.h)}
@@ -160,5 +123,10 @@ class Node {
 
   toString {
     return "%(isLeaf ? "Leaf" : "Tree") at %(x),%(y) (%(w),%(h))"
+  }
+
+  createRoom(){
+    _room = Room.new(this)
+    return _room
   }
 }
