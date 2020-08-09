@@ -4,31 +4,12 @@ import "2d" for Tileset, AbstractBatch, SpriteBatch, Quad
 import "container" for GlobalContainer
 import "graphics" for Colors
 
+
 import "./game/map/random" for ProdGen
 import "./game/map/map" for LevelMap, LevelElement
 import "./game/map/entity" for Light, Enemy, Item
 import "./game/map/graph" for Node, SplitDir, Connection
 
-GlobalContainer.registerInstance("MAP", {"map": null, "lights": []})
-GlobalContainer.registerFactory("GeneratorComponent"){|c| GeneratorComponent.new(c.resolve("MAP")) }
-
-class GeneratorComponent {
-  construct new(map){
-    _mapState = map
-  }
-
-  start(){
-    _gen = MapGen.new(32,32, 5)
-    _mapState["lights"] = _gen.lights
-    _mapState["enemies"] = _gen.enemies
-    _mapState["items"] = _gen.items
-    _mapState["map"] = _gen.map
-    _mapState["img"] = _gen.image
-  }
-
-  update(){}
-
-}
 
 class MapGen {
 
@@ -81,7 +62,6 @@ class MapGen {
     
 
     // n.collectNeighbours(_root)
-    System.print(n.neighbours)
     connect(_root)
     paint(_root)
   }

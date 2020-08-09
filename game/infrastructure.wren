@@ -3,9 +3,16 @@ import "data" for Ringbuffer
 class GameEvent {
 
   id { _id }
+  payload { _payload }
 
   construct new(id){
     _id = id
+    _payload = null
+  }
+
+  construct new(id, payload){
+    _id = id
+    _payload = payload
   }
 }
 
@@ -16,7 +23,10 @@ class EventQueue {
   construct new(size){
     _queue = Ringbuffer.new(size)
     _handlers = {}
+    _debug = false
   }
+
+  debug=(v) { _debug = v }
 
   add(gameEvent){
     _queue.enqueue(gameEvent)
@@ -31,6 +41,7 @@ class EventQueue {
     if(count == 0) return false
     var ev = _queue.dequeue()
     var handlers = _handlers[ev.id]
+    if(_debug) System.print("EQ: Dispatch '%(ev.id)'")
     if(handlers){
       for(h in handlers){
         h.call(ev)

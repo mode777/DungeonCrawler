@@ -122,7 +122,6 @@ class Node {
   collectDown(graph, cx, cy){
     while(cy < (y+h)){
       var n = graph.leafAt(cx, cy)
-      System.print([cx,cy])
       if(n == null) break
       cy = n.y + n.h
       _neighbours.add(n)
@@ -140,7 +139,6 @@ class Node {
 
   collectNeighbours(graph){
     _neighbours = []
-    System.print([x,y,w,h])
     collectDown(graph,x-1,y)
     collectDown(graph,x+w,y)
     collectRight(graph,x, y-1)
