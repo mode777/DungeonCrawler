@@ -9,6 +9,9 @@ import "./tests/gltf.spec"
 import "./tests/math.spec"
 import "./tests/font.spec"
 import "./tests/perf.spec"
+import "./tests/data.spec"
+
+import "./tests/game/infrastructure.spec"
 
 Application.onLoad {
   //Application.logLevel(Severity.Debug)

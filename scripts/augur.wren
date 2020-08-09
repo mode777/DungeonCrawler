@@ -32,6 +32,10 @@ class Assert {
       }
     }
   }
+
+  static contains(seq, val){
+    return seq.contains(val)
+  }
 }
 
 class Augur {
