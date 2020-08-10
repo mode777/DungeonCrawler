@@ -1,22 +1,15 @@
-import "component" for Component
 import "math" for Vec2, Vec3
-import "container" for GlobalContainer
-
-GlobalContainer.registerFactory("PlayerCollisionComponent"){ |c| PlayerCollisionComponent.new(c.resolve("MAP"), c.resolve("PLAYER")) }
 
 class PlayerCollisionComponent {
-  construct new(map, player){
-    _mapState = map
-    _playerState = player
+  construct new(){
   }
 
-  start(){
-    _map = _mapState["map"]
-    _pos = _playerState["position"]
-    _heading = _playerState["heading"]
-    _target = _playerState["target"]
-    _delta = _playerState["delta"]
-    _forward = _playerState["forward"]
+  start(playerState){
+    _pos = playerState["position"]
+    _heading = playerState["heading"]
+    _target = playerState["target"]
+    _delta = playerState["delta"]
+    _forward = playerState["forward"]
     _lastPos = Vec3.zero()
     _pos2d = Vec2.zero()
     _delta2d = Vec2.zero()
@@ -32,7 +25,7 @@ class PlayerCollisionComponent {
     _frac = Vec2.zero()
   }
 
-  update(){
+  update(map){
     Vec2.set(_pos[0], _pos[2], _pos2d)
     //Vec2.set(_delta[0], _delta[2], _delta2d)
     //Vec2.add(_pos2d,_delta2d,_pos2d)
@@ -42,10 +35,10 @@ class PlayerCollisionComponent {
     Vec2.add(_pos2d, _offset, _offset, _c)
     Vec2.add(_pos2d, _offset, -_offset, _d)
 
-    var a = !_map[_a[0].floor,_a[1].floor].isPassable
-    var b = !_map[_b[0].floor,_b[1].floor].isPassable
-    var c = !_map[_c[0].floor,_c[1].floor].isPassable
-    var d = !_map[_d[0].floor,_d[1].floor].isPassable
+    var a = !map[_a[0].floor,_a[1].floor].isPassable
+    var b = !map[_b[0].floor,_b[1].floor].isPassable
+    var c = !map[_c[0].floor,_c[1].floor].isPassable
+    var d = !map[_d[0].floor,_d[1].floor].isPassable
 
     // left
     if(a && b){

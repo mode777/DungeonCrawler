@@ -1,20 +1,21 @@
-import "container" for GlobalContainer
 import "platform" for Application, Event, Keyboard
 
 import "./game/events" for SystemEvents, InputEvents
-import "./game/infrastructure" for EventQueue, GameEvent
+import "./game/infrastructure" for EventQueue, GameEvent, GameSystem
 
-var queue = GlobalContainer.resolve(EventQueue)
+GameSystem.attach("main"){|s|
+  var queue = s.queue
 
-var inputState = {}
-var inputEvent = GameEvent.new(InputEvents.Update, inputState) 
+  var inputState = {}
+  var inputEvent = GameEvent.new(InputEvents.Update, inputState) 
 
-queue.subscribe(SystemEvents.Update){
-  inputState["forward"] = Keyboard.isDown("W")
-  inputState["backward"] = Keyboard.isDown("S")
-  inputState["turn_left"] = Keyboard.isDown("Left")
-  inputState["turn_right"] = Keyboard.isDown("Right")
-  inputState["strafe_left"] = Keyboard.isDown("A")
-  inputState["strafe_right"] = Keyboard.isDown("D")
-  queue.add(inputEvent)
+  queue.subscribe(SystemEvents.Update){
+    inputState["forward"] = Keyboard.isDown("W")
+    inputState["backward"] = Keyboard.isDown("S")
+    inputState["turn_left"] = Keyboard.isDown("Left")
+    inputState["turn_right"] = Keyboard.isDown("Right")
+    inputState["strafe_left"] = Keyboard.isDown("A")
+    inputState["strafe_right"] = Keyboard.isDown("D")
+    queue.add(inputEvent)
+  }
 }
