@@ -20,7 +20,7 @@ GameSystem.attach("main"){|sys|
     var scale = 4
     var cam = OrthograficCamera.new()
     var target = Vec3.zero()
-    var txt = Texture.fromImage(mapState["img"], {"magFilter": TextureFilters.Nearest, "minFilter": TextureFilters.Nearest, "mipmaps": false })
+    var txt = Texture.fromImage(mapState.image, {"magFilter": TextureFilters.Nearest, "minFilter": TextureFilters.Nearest, "mipmaps": false })
     var batch = SpriteBatch.new(txt,3)
     var s = Quad.new(0,0,txt.width,txt.height)
     var t = Quad.new(0,0,txt.width * scale, txt.height * scale)
@@ -45,12 +45,11 @@ GameSystem.attach("main"){|sys|
       batch.setTarget(1, pointer)
       pointertarget.set(target[0]*scale-scale/4,target[2]*scale-scale/4,scale/2, scale/2)
       batch.setTarget(2, pointertarget)
-
-      Renderer.set2d()
-      cam.enable()
     }
 
-    sys.queue.subscribe(SystemEvents.Draw){|ev|
+    sys.queue.subscribe(SystemEvents.Draw2){|ev|
+      Renderer.set2d()
+      cam.enable()
       batch.draw()      
     }
 

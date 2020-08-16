@@ -146,6 +146,14 @@ class Grid {
       }
     }
   }
+
+  subGrid(x,y,w,h){
+    var grid = Grid.new(w,h,_default,_seed)
+    this.forEachXY {|ox,oy,v|
+      grid[ox+x,oy+y] = v
+    }
+    return grid
+  }
 }
 
 class BufferView {

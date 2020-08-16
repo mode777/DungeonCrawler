@@ -14,4 +14,5 @@ class ProdGen {
   color(){ [_random.int(255),_random.int(255),_random.int(255),255] }
   float(s,e){ _random.float(s,e) }
   select(list){ list[_random.int(list.count)] }
+  roll(chance){ _random.int(100) < chance }
 }

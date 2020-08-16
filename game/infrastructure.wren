@@ -5,6 +5,7 @@ class GameEvent {
 
   id { _id }
   payload { _payload }
+  payload=(v) { _payload = v }
 
   construct new(id){
     _id = id
@@ -25,9 +26,11 @@ class EventQueue {
     _queue = Ringbuffer.new(size)
     _handlers = {}
     _debug = false
+    _profile = false
   }
 
   debug=(v) { _debug = v }
+  profile=(v) { _profile = v }
 
   add(gameEvent){
     _queue.enqueue(gameEvent)
@@ -71,7 +74,10 @@ class EventQueue {
 
 var InitEvent = GameEvent.new(SystemEvents.Init)
 var UpdateEvent = GameEvent.new(SystemEvents.Update)
-var DrawEvent = GameEvent.new(SystemEvents.Draw)
+var DrawEventLayer1 = GameEvent.new(SystemEvents.Draw1)
+var DrawEventLayer2 = GameEvent.new(SystemEvents.Draw2)
+var DrawEventLayer3 = GameEvent.new(SystemEvents.Draw3)
+var DrawEventLayer4 = GameEvent.new(SystemEvents.Draw4)
 
 class GameSystem {
   
@@ -94,7 +100,10 @@ class GameSystem {
   update(){
     _queue.add(UpdateEvent)
     var count = queue.count
-    _queue.add(DrawEvent)
+    _queue.add(DrawEventLayer1)
+    _queue.add(DrawEventLayer2)
+    _queue.add(DrawEventLayer3)
+    _queue.add(DrawEventLayer4)
     for(i in 0...count){
       _queue.dispatchNext()
     }

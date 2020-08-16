@@ -13,7 +13,7 @@ GameSystem.attach("main"){|s|
   }
 
   s.queue.subscribe(MapEvents.Load){|e|
-    var map = e.payload["map"]
+    var map = e.payload.map
     s.queue.subscribe(PlayerEvents.Move){|e|
       comp.update(map)      
     }

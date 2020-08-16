@@ -1,4 +1,6 @@
 import "memory" for Grid
+import "image" for Image
+import "graphics" for Colors
 
 var Wall_
 var Floor_
@@ -11,6 +13,8 @@ class LevelElement {
   static Door { Door_ }
 
   sprite { _sprite }
+  spriteDown { "panel_a" } 
+  spriteUp { "floor_checker" } 
   isSolid { _flags & SOLID > 0 }
   isPassable { _flags & PASSABLE > 0 }
   isDoor { _flags & DOOR > 0 }
@@ -44,4 +48,12 @@ class LevelMap is Grid {
     super(w, h, LevelElement.Wall, LevelElement.Wall)
   }
 
+  toImage(){
+    var img = Image.new(width,height)
+    this.forEachXY {|x,y,v|
+      if(v == Door_) img.setPixel(x,y,Colors.Red)
+      if(v == Floor_) img.setPixel(x,y,Colors.White)
+    }
+    return img
+  }
 }

@@ -9,7 +9,7 @@ import "./game/map/random" for ProdGen
 import "./game/map/map" for LevelMap, LevelElement
 import "./game/map/entity" for Light, Enemy, Item
 import "./game/map/graph" for Node, SplitDir, Connection
-
+import "./game/map/room" for RoomGenerator
 
 class MapGen {
 
@@ -18,11 +18,13 @@ class MapGen {
   lights { _lights }
   enemies { _enemies }
   items { _items }
+  rooms { _rooms }
+  startRoom { _startRoom }
+  graph { _root }
 
   construct new(w,h, threshold){
     _w = w
     _h = h
-    _img = Image.new(w,h)
     _map = LevelMap.new(w,h)
     _root = Node.new(Quad.new(0,0,_w,_h))
     _threshold = threshold
@@ -56,110 +58,15 @@ class MapGen {
 
   generate(){
     split(_root)
-    
-    var n = _root.leafAt(10,10)
-    n.collectNeighbours(_root)
-    
-
-    // n.collectNeighbours(_root)
-    connect(_root)
-    paint(_root)
-  }
-
-  connect(n){
-    var ls = n.getLeaves()
-    for(l in ls){
-      l.collectNeighbours(n)
-      for(n in l.neighbours){
-        if(n.x == l.x+l.w){
-          var start = Math.max(l.y, n.y) + 1
-          var end = Math.min(l.y+l.h, n.y+n.h)
-          var size = end-start
-          if(size > 0){
-            var y = start + _pg.size(size, 1)
-            var x = l.x
-            var con = Connection.new(l, n, [x,y])
-            l.addConnection(con)
-            n.addConnection(con)
-          }
-        }
-        if(l.x == n.x+n.w){
-
-        }
-
-      }
+        
+    _rooms = _root.getLeaves()
+    _startRoom = _pg.select(_rooms)
+    var roomGen = RoomGenerator.new(_pg, _root, _map) 
+    for(r in _rooms){
+      roomGen.generate(r)
+      addLights(r) 
     }
-
-
-    // if(n.isLeaf) return
-
-    // if(n.left.isLeaf && n.right.isLeaf) {
-    //   connectAdjacent(n)
-    //   return
-    // }    
-
-    // var left =  n.findLeavesLeft()
-    // var right = n.findLeavesRight()
-    
-    // for(rl in left){
-    //   for(rr in right){
-    //     if(n.splitDir == SplitDir.H){
-    //       var start = Math.max(rl.y, rr.y) + 1
-    //       var end = Math.min(rl.y+rl.h, rr.y+rr.h)
-    //       var size = end-start
-    //       if(size > 0){
-    //         var y = start + _pg.size(size, 1)
-    //         var x = rr.x
-    //         var con = Connection.new(rl, rr, [x,y])
-    //         rl.addConnection(con)
-    //         rr.addConnection(con)
-    //       }
-    //     } else {
-    //       var start = Math.max(rl.x, rr.x) + 1
-    //       var end = Math.min(rl.x+rl.w, rr.x+rr.w)
-    //       var size = end-start
-    //       if(size > 0){
-    //         var x = start + _pg.size(size, 1)
-    //         var y = rr.y
-    //         var con = Connection.new(rl, rr, [x,y])
-    //         rl.addConnection(con)
-    //         rr.addConnection(con)
-    //       }
-    //     }
-    //   }
-    //}
-
-    // connect(n.left)
-    // connect(n.right)
-  }
-
-  connectAdjacent(n){
-    var pos
-    if(n.splitDir == SplitDir.H){
-      pos = [n.right.x, n.right.y+_pg.size(n.right.h, 2)]
-    } else {
-      pos = [n.right.x+_pg.size(n.right.w, 2), n.right.y]        
-    }
-    var con = Connection.new(n.left, n.right, pos)
-    n.left.addConnection(con)
-    n.right.addConnection(con)
-  }
-
-  paint(n){
-    if(n.isLeaf){    
-      
-      addLights(n)
-      addEnemies(n)
-      addItems(n)
-      
-      addRoom(n.quad)
-      for(c in n.connections){
-        addDoor(c.x, c.y)
-      }
-    } else {
-      paint(n.left)
-      paint(n.right)
-    }
+    _img = _map.toImage()
   }
 
   addLights(n){
@@ -193,26 +100,12 @@ class MapGen {
   }
 
   split(n){
-    if(n.w * n.h > (_threshold * _threshold * 2)){
+    if(n.w * n.h > (_threshold * _threshold * 5)){
       n.split(_pg, _threshold)
       split(n.left)
       split(n.right)
     }
   }
 
-  addDoor(x,y){
-    _img.setPixel(x, y, Colors.Red)
-    _map[x,y] = LevelElement.Door
-  }
-
-  addRoom(q){
-    var c = Colors.White
-    for(y in q.y+1...q.y+q.h){
-      for(x in q.x+1...q.x+q.w){
-        _img.setPixel(x,y,c)
-        _map[x,y] = LevelElement.Floor
-      }
-    }
-  }  
 }
 

@@ -1,4 +1,5 @@
 import "2d" for Quad
+import "./game/map/entity" for Entity
 
 class SplitDir {
   static H { 0 }
@@ -19,7 +20,7 @@ class Connection {
   }
 }
 
-class Node {
+class Node is Entity {
   
   isLeaf { !_a && !_b }
   quad { _q }
@@ -27,13 +28,18 @@ class Node {
   right { _b }
   w { _q.w }
   h { _q.h }
-  x { _q.x }
-  y { _q.y }
+  // x { _q.x }
+  // y { _q.y }
   splitDir { _d }
   connections { _connections }
-  neighbours { _neighbours }
+  neighboursLeft { _nLeft }
+  neighboursRight { _nRight }
+  neighboursUp { _nUp }
+  neighboursDown { _nDown }
+  neighbours { _nLeft + _nRight + _nUp + _nDown }
   
   construct new(q){
+    super(q.x, q.y)
     _q = q
     _connections = []
   }
@@ -52,50 +58,6 @@ class Node {
 
   addConnection(c){
     _connections.add(c)
-  }
-
-  findLeavesLeft(){
-    if(_d == SplitDir.H){
-      return findLeavesLeft(_b.x, _d)
-    } else {
-      return findLeavesLeft(_b.y, _d)
-    }    
-  }
-
-  findLeavesLeft(coord, dir){
-    if(isLeaf){
-      if(dir == SplitDir.H && _q.x+_q.w == coord){
-        return [this]
-      } else if(dir == SplitDir.V && _q.y+_q.h == coord) {
-        return [this]
-      } else {
-        return []
-      }
-    } else {
-      return _a.findLeavesLeft(coord,dir) + _b.findLeavesLeft(coord,dir)
-    }
-  }
-
-  findLeavesRight(){
-    if(_d == SplitDir.H){
-      return findLeavesRight(_b.x, _d)
-    } else {
-      return findLeavesRight(_b.y, _d)
-    }
-  }
-
-  findLeavesRight(coord, dir){
-    if(isLeaf){
-      if(dir == SplitDir.H && _q.x == coord){
-        return [this]
-      } else if(dir == SplitDir.V && _q.y == coord) {
-        return [this]
-      } else {
-        return []
-      }
-    } else {
-      return _a.findLeavesRight(coord,dir) + _b.findLeavesRight(coord,dir)
-    }
   }
 
   leafAt(x,y){
@@ -119,36 +81,39 @@ class Node {
     }
   }
 
-  collectDown(graph, cx, cy){
+  collectDown(graph, cx, cy, coll){
     while(cy < (y+h)){
       var n = graph.leafAt(cx, cy)
       if(n == null) break
       cy = n.y + n.h
-      _neighbours.add(n)
+      coll.add(n)
     }
   }
 
-  collectRight(graph, cx, cy){
+  collectRight(graph, cx, cy, coll){
     while(cx < (x+w)){
       var n = graph.leafAt(cx, cy)
       if(n == null) break
       cx = n.x + n.w
-      _neighbours.add(n)
+      coll.add(n)
     }
   }
 
   collectNeighbours(graph){
-    _neighbours = []
-    collectDown(graph,x-1,y)
-    collectDown(graph,x+w,y)
-    collectRight(graph,x, y-1)
-    collectRight(graph,x, y+h)
+    _nLeft = []
+    _nRight = []
+    _nUp = []
+    _nDown = []
+    collectDown(graph,x-1,y, _nLeft)
+    collectDown(graph,x+w,y, _nRight)
+    collectRight(graph,x, y-1, _nUp)
+    collectRight(graph,x, y+h, _nDown)
   } 
 
   isInside(x,y){x >= this.x && x < (this.x + this.w) && y >= this.y && y < (this.y + this.h)}
 
   center(){
-    return [_q.x+(_q.w/2).floor, _q.y+(_q.h/2).floor]
+    return [_q.x+(_q.w/2), _q.y+(_q.h/2)]
   }
 
   getLeaves(){

@@ -168,11 +168,8 @@ Module['FS_createPath']('/game', 'movement', true, true);
         var byteArray = new Uint8Array(arrayBuffer);
         var curr;
         
-          // copy the entire loaded file into a spot in the heap. Files will refer to slices in that. They cannot be freed though
-          // (we may be allocating before malloc is ready, during startup).
-          var ptr = Module['getMemory'](byteArray.length);
-          Module['HEAPU8'].set(byteArray, ptr);
-          DataRequest.prototype.byteArray = Module['HEAPU8'].subarray(ptr, ptr+byteArray.length);
+          // Reuse the bytearray from the XHR as the source for file reads.
+          DataRequest.prototype.byteArray = byteArray;
     
             var files = metadata['files'];
             for (var i = 0; i < files.length; ++i) {
@@ -202,7 +199,7 @@ Module['FS_createPath']('/game', 'movement', true, true);
     }
   
    }
-   loadPackage({"files": [{"start": 0, "audio": 0, "end": 215, "filename": "/shaders/2d.fragment.glsl"}, {"start": 215, "audio": 0, "end": 662, "filename": "/shaders/2d.vertex.glsl"}, {"start": 662, "audio": 0, "end": 4128, "filename": "/shaders/3d.fragment.glsl"}, {"start": 4128, "audio": 0, "end": 6688, "filename": "/shaders/3d.vertex.glsl"}, {"start": 6688, "audio": 0, "end": 6787, "filename": "/shaders/hexaglott.fragment.glsl"}, {"start": 6787, "audio": 0, "end": 7508, "filename": "/shaders/hexaglott.vertex.glsl"}, {"start": 7508, "audio": 0, "end": 7967, "filename": "/shaders/sky.fragment.glsl"}, {"start": 7967, "audio": 0, "end": 8213, "filename": "/shaders/sky.vertex.glsl"}, {"start": 8213, "audio": 0, "end": 9626, "filename": "/shaders/terrain.fragment.glsl"}, {"start": 9626, "audio": 0, "end": 10296, "filename": "/shaders/terrain.vertex.glsl"}, {"start": 10296, "audio": 0, "end": 16536, "filename": "/scripts/2d.wren"}, {"start": 16536, "audio": 0, "end": 16730, "filename": "/scripts/architecture.wren"}, {"start": 16730, "audio": 0, "end": 19676, "filename": "/scripts/augur.wren"}, {"start": 19676, "audio": 0, "end": 24973, "filename": "/scripts/camera.wren"}, {"start": 24973, "audio": 0, "end": 26298, "filename": "/scripts/component.wren"}, {"start": 26298, "audio": 0, "end": 27016, "filename": "/scripts/container.wren"}, {"start": 27016, "audio": 0, "end": 30521, "filename": "/scripts/font.wren"}, {"start": 30521, "audio": 0, "end": 35481, "filename": "/scripts/geometry.wren"}, {"start": 35481, "audio": 0, "end": 43542, "filename": "/scripts/gltf.wren"}, {"start": 43542, "audio": 0, "end": 55046, "filename": "/scripts/graphics.wren"}, {"start": 55046, "audio": 0, "end": 56740, "filename": "/scripts/helpers.wren"}, {"start": 56740, "audio": 0, "end": 60596, "filename": "/scripts/hexaglott.wren"}, {"start": 60596, "audio": 0, "end": 61497, "filename": "/scripts/image.wren"}, {"start": 61497, "audio": 0, "end": 62203, "filename": "/scripts/io.wren"}, {"start": 62203, "audio": 0, "end": 63353, "filename": "/scripts/json.wren"}, {"start": 63353, "audio": 0, "end": 69045, "filename": "/scripts/math.wren"}, {"start": 69045, "audio": 0, "end": 82058, "filename": "/scripts/memory.wren"}, {"start": 82058, "audio": 0, "end": 89976, "filename": "/scripts/platform.wren"}, {"start": 89976, "audio": 0, "end": 91028, "filename": "/scripts/stream.wren"}, {"start": 91028, "audio": 0, "end": 92743, "filename": "/scripts/vertex_colors.wren"}, {"start": 92743, "audio": 0, "end": 99302, "filename": "/scripts/wfc.wren"}, {"start": 99302, "audio": 0, "end": 138526, "filename": "/assets/fantasy-tileset.png"}, {"start": 138526, "audio": 0, "end": 177716, "filename": "/assets/fantasy-tileset.png.pyxel"}, {"start": 177716, "audio": 0, "end": 178312, "filename": "/game/index.wren"}, {"start": 178312, "audio": 0, "end": 178577, "filename": "/game/collision/index.wren"}, {"start": 178577, "audio": 0, "end": 181611, "filename": "/game/collision/player.wren"}, {"start": 181611, "audio": 0, "end": 183686, "filename": "/game/graphics/2d.wren"}, {"start": 183686, "audio": 0, "end": 186988, "filename": "/game/graphics/3d.wren"}, {"start": 186988, "audio": 0, "end": 188756, "filename": "/game/graphics/billboard.wren"}, {"start": 188756, "audio": 0, "end": 189895, "filename": "/game/graphics/cube.wren"}, {"start": 189895, "audio": 0, "end": 190932, "filename": "/game/graphics/gfx.wren"}, {"start": 190932, "audio": 0, "end": 193831, "filename": "/game/graphics/gfx_db.wren"}, {"start": 193831, "audio": 0, "end": 194136, "filename": "/game/graphics/index.wren"}, {"start": 194136, "audio": 0, "end": 195444, "filename": "/game/graphics/lightmap.wren"}, {"start": 195444, "audio": 0, "end": 199171, "filename": "/game/graphics/quad3d.wren"}, {"start": 199171, "audio": 0, "end": 199400, "filename": "/game/input/index.wren"}, {"start": 199400, "audio": 0, "end": 200209, "filename": "/game/input/input.wren"}, {"start": 200209, "audio": 0, "end": 208893, "filename": "/game/map/generator.wren"}, {"start": 208893, "audio": 0, "end": 209137, "filename": "/game/map/index.wren"}, {"start": 209137, "audio": 0, "end": 209614, "filename": "/game/movement/enemy.wren"}, {"start": 209614, "audio": 0, "end": 209944, "filename": "/game/movement/index.wren"}, {"start": 209944, "audio": 0, "end": 211979, "filename": "/game/movement/player.wren"}, {"start": 211979, "audio": 0, "end": 212250, "filename": "/main.wren"}], "remote_package_size": 212250, "package_uuid": "39437235-a191-4bb2-b81f-9d2cb5a5937b"});
+   loadPackage({"files": [{"start": 0, "audio": 0, "end": 215, "filename": "/shaders/2d.fragment.glsl"}, {"start": 215, "audio": 0, "end": 662, "filename": "/shaders/2d.vertex.glsl"}, {"start": 662, "audio": 0, "end": 4128, "filename": "/shaders/3d.fragment.glsl"}, {"start": 4128, "audio": 0, "end": 6688, "filename": "/shaders/3d.vertex.glsl"}, {"start": 6688, "audio": 0, "end": 6787, "filename": "/shaders/hexaglott.fragment.glsl"}, {"start": 6787, "audio": 0, "end": 7508, "filename": "/shaders/hexaglott.vertex.glsl"}, {"start": 7508, "audio": 0, "end": 7967, "filename": "/shaders/sky.fragment.glsl"}, {"start": 7967, "audio": 0, "end": 8213, "filename": "/shaders/sky.vertex.glsl"}, {"start": 8213, "audio": 0, "end": 9626, "filename": "/shaders/terrain.fragment.glsl"}, {"start": 9626, "audio": 0, "end": 10296, "filename": "/shaders/terrain.vertex.glsl"}, {"start": 10296, "audio": 0, "end": 16536, "filename": "/scripts/2d.wren"}, {"start": 16536, "audio": 0, "end": 16730, "filename": "/scripts/architecture.wren"}, {"start": 16730, "audio": 0, "end": 19743, "filename": "/scripts/augur.wren"}, {"start": 19743, "audio": 0, "end": 25040, "filename": "/scripts/camera.wren"}, {"start": 25040, "audio": 0, "end": 26365, "filename": "/scripts/component.wren"}, {"start": 26365, "audio": 0, "end": 27083, "filename": "/scripts/container.wren"}, {"start": 27083, "audio": 0, "end": 27632, "filename": "/scripts/data.wren"}, {"start": 27632, "audio": 0, "end": 31137, "filename": "/scripts/font.wren"}, {"start": 31137, "audio": 0, "end": 36097, "filename": "/scripts/geometry.wren"}, {"start": 36097, "audio": 0, "end": 44158, "filename": "/scripts/gltf.wren"}, {"start": 44158, "audio": 0, "end": 55662, "filename": "/scripts/graphics.wren"}, {"start": 55662, "audio": 0, "end": 57356, "filename": "/scripts/helpers.wren"}, {"start": 57356, "audio": 0, "end": 61212, "filename": "/scripts/hexaglott.wren"}, {"start": 61212, "audio": 0, "end": 62113, "filename": "/scripts/image.wren"}, {"start": 62113, "audio": 0, "end": 62819, "filename": "/scripts/io.wren"}, {"start": 62819, "audio": 0, "end": 63969, "filename": "/scripts/json.wren"}, {"start": 63969, "audio": 0, "end": 69661, "filename": "/scripts/math.wren"}, {"start": 69661, "audio": 0, "end": 82829, "filename": "/scripts/memory.wren"}, {"start": 82829, "audio": 0, "end": 90747, "filename": "/scripts/platform.wren"}, {"start": 90747, "audio": 0, "end": 91799, "filename": "/scripts/stream.wren"}, {"start": 91799, "audio": 0, "end": 93514, "filename": "/scripts/vertex_colors.wren"}, {"start": 93514, "audio": 0, "end": 100073, "filename": "/scripts/wfc.wren"}, {"start": 100073, "audio": 0, "end": 208726, "filename": "/assets/2020-08-02-19-07-46.png"}, {"start": 208726, "audio": 0, "end": 247950, "filename": "/assets/fantasy-tileset.png"}, {"start": 247950, "audio": 0, "end": 287140, "filename": "/assets/fantasy-tileset.png.pyxel"}, {"start": 287140, "audio": 0, "end": 287590, "filename": "/game/events.wren"}, {"start": 287590, "audio": 0, "end": 288311, "filename": "/game/index.wren"}, {"start": 288311, "audio": 0, "end": 290604, "filename": "/game/infrastructure.wren"}, {"start": 290604, "audio": 0, "end": 291091, "filename": "/game/collision/index.wren"}, {"start": 291091, "audio": 0, "end": 293830, "filename": "/game/collision/player.wren"}, {"start": 293830, "audio": 0, "end": 295919, "filename": "/game/graphics/2d.wren"}, {"start": 295919, "audio": 0, "end": 300348, "filename": "/game/graphics/3d.wren"}, {"start": 300348, "audio": 0, "end": 302116, "filename": "/game/graphics/billboard.wren"}, {"start": 302116, "audio": 0, "end": 303255, "filename": "/game/graphics/cube.wren"}, {"start": 303255, "audio": 0, "end": 304292, "filename": "/game/graphics/gfx.wren"}, {"start": 304292, "audio": 0, "end": 307192, "filename": "/game/graphics/gfx_db.wren"}, {"start": 307192, "audio": 0, "end": 307248, "filename": "/game/graphics/index.wren"}, {"start": 307248, "audio": 0, "end": 308556, "filename": "/game/graphics/lightmap.wren"}, {"start": 308556, "audio": 0, "end": 312283, "filename": "/game/graphics/quad3d.wren"}, {"start": 312283, "audio": 0, "end": 313009, "filename": "/game/input/index.wren"}, {"start": 313009, "audio": 0, "end": 313731, "filename": "/game/map/entity.wren"}, {"start": 313731, "audio": 0, "end": 316160, "filename": "/game/map/generator.wren"}, {"start": 316160, "audio": 0, "end": 318699, "filename": "/game/map/graph.wren"}, {"start": 318699, "audio": 0, "end": 319104, "filename": "/game/map/index.wren"}, {"start": 319104, "audio": 0, "end": 320347, "filename": "/game/map/map.wren"}, {"start": 320347, "audio": 0, "end": 320830, "filename": "/game/map/random.wren"}, {"start": 320830, "audio": 0, "end": 323244, "filename": "/game/map/room.wren"}, {"start": 323244, "audio": 0, "end": 323721, "filename": "/game/movement/enemy.wren"}, {"start": 323721, "audio": 0, "end": 323784, "filename": "/game/movement/index.wren"}, {"start": 323784, "audio": 0, "end": 326344, "filename": "/game/movement/player.wren"}, {"start": 326344, "audio": 0, "end": 326614, "filename": "/main.wren"}], "remote_package_size": 326614, "package_uuid": "48a5f460-1e2e-4321-b837-620e4c03e49c"});
   
   })();
   
@@ -1420,11 +1417,11 @@ function updateGlobalBufferAndViews(buf) {
 }
 
 var STATIC_BASE = 1024,
-    STACK_BASE = 5342368,
+    STACK_BASE = 5342432,
     STACKTOP = STACK_BASE,
-    STACK_MAX = 99488,
-    DYNAMIC_BASE = 5342368,
-    DYNAMICTOP_PTR = 99328;
+    STACK_MAX = 99552,
+    DYNAMIC_BASE = 5342432,
+    DYNAMICTOP_PTR = 99392;
 
 assert(STACK_BASE % 16 === 0, 'stack must start aligned');
 assert(DYNAMIC_BASE % 16 === 0, 'heap must start aligned');
@@ -1459,8 +1456,6 @@ assert(typeof Int32Array !== 'undefined' && typeof Float64Array !== 'undefined' 
   {
     wasmMemory = new WebAssembly.Memory({
       'initial': INITIAL_TOTAL_MEMORY / WASM_PAGE_SIZE
-      ,
-      'maximum': INITIAL_TOTAL_MEMORY / WASM_PAGE_SIZE
     });
   }
 
@@ -1934,22 +1929,22 @@ var tempI64;
 // === Body ===
 
 var ASM_CONSTS = {
-  63940: function($0, $1, $2) {var w = $0; var h = $1; var pixels = $2; if (!Module['SDL2']) Module['SDL2'] = {}; var SDL2 = Module['SDL2']; if (SDL2.ctxCanvas !== Module['canvas']) { SDL2.ctx = Module['createContext'](Module['canvas'], false, true); SDL2.ctxCanvas = Module['canvas']; } if (SDL2.w !== w || SDL2.h !== h || SDL2.imageCtx !== SDL2.ctx) { SDL2.image = SDL2.ctx.createImageData(w, h); SDL2.w = w; SDL2.h = h; SDL2.imageCtx = SDL2.ctx; } var data = SDL2.image.data; var src = pixels >> 2; var dst = 0; var num; if (typeof CanvasPixelArray !== 'undefined' && data instanceof CanvasPixelArray) { num = data.length; while (dst < num) { var val = HEAP32[src]; data[dst ] = val & 0xff; data[dst+1] = (val >> 8) & 0xff; data[dst+2] = (val >> 16) & 0xff; data[dst+3] = 0xff; src++; dst += 4; } } else { if (SDL2.data32Data !== data) { SDL2.data32 = new Int32Array(data.buffer); SDL2.data8 = new Uint8Array(data.buffer); } var data32 = SDL2.data32; num = data32.length; data32.set(HEAP32.subarray(src, src + num)); var data8 = SDL2.data8; var i = 3; var j = i + 4*num; if (num % 8 == 0) { while (i < j) { data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; } } else { while (i < j) { data8[i] = 0xff; i = i + 4 | 0; } } } SDL2.ctx.putImageData(SDL2.image, 0, 0); return 0;},  
- 65395: function($0, $1, $2, $3, $4) {var w = $0; var h = $1; var hot_x = $2; var hot_y = $3; var pixels = $4; var canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h; var ctx = canvas.getContext("2d"); var image = ctx.createImageData(w, h); var data = image.data; var src = pixels >> 2; var dst = 0; var num; if (typeof CanvasPixelArray !== 'undefined' && data instanceof CanvasPixelArray) { num = data.length; while (dst < num) { var val = HEAP32[src]; data[dst ] = val & 0xff; data[dst+1] = (val >> 8) & 0xff; data[dst+2] = (val >> 16) & 0xff; data[dst+3] = (val >> 24) & 0xff; src++; dst += 4; } } else { var data32 = new Int32Array(data.buffer); num = data32.length; data32.set(HEAP32.subarray(src, src + num)); } ctx.putImageData(image, 0, 0); var url = hot_x === 0 && hot_y === 0 ? "url(" + canvas.toDataURL() + "), auto" : "url(" + canvas.toDataURL() + ") " + hot_x + " " + hot_y + ", auto"; var urlBuf = _malloc(url.length + 1); stringToUTF8(url, urlBuf, url.length + 1); return urlBuf;},  
- 66384: function($0) {if (Module['canvas']) { Module['canvas'].style['cursor'] = UTF8ToString($0); } return 0;},  
- 66477: function() {if (Module['canvas']) { Module['canvas'].style['cursor'] = 'none'; }},  
- 67702: function() {return screen.width;},  
- 67729: function() {return screen.height;},  
- 67802: function($0) {if (typeof Module['setWindowTitle'] !== 'undefined') { Module['setWindowTitle'](UTF8ToString($0)); } return 0;},  
- 67956: function() {if (typeof(AudioContext) !== 'undefined') { return 1; } else if (typeof(webkitAudioContext) !== 'undefined') { return 1; } return 0;},  
- 68122: function() {if ((typeof(navigator.mediaDevices) !== 'undefined') && (typeof(navigator.mediaDevices.getUserMedia) !== 'undefined')) { return 1; } else if (typeof(navigator.webkitGetUserMedia) !== 'undefined') { return 1; } return 0;},  
- 68348: function($0) {if(typeof(Module['SDL2']) === 'undefined') { Module['SDL2'] = {}; } var SDL2 = Module['SDL2']; if (!$0) { SDL2.audio = {}; } else { SDL2.capture = {}; } if (!SDL2.audioContext) { if (typeof(AudioContext) !== 'undefined') { SDL2.audioContext = new AudioContext(); } else if (typeof(webkitAudioContext) !== 'undefined') { SDL2.audioContext = new webkitAudioContext(); } } return SDL2.audioContext === undefined ? -1 : 0;},  
- 68831: function() {var SDL2 = Module['SDL2']; return SDL2.audioContext.sampleRate;},  
- 68901: function($0, $1, $2, $3) {var SDL2 = Module['SDL2']; var have_microphone = function(stream) { if (SDL2.capture.silenceTimer !== undefined) { clearTimeout(SDL2.capture.silenceTimer); SDL2.capture.silenceTimer = undefined; } SDL2.capture.mediaStreamNode = SDL2.audioContext.createMediaStreamSource(stream); SDL2.capture.scriptProcessorNode = SDL2.audioContext.createScriptProcessor($1, $0, 1); SDL2.capture.scriptProcessorNode.onaudioprocess = function(audioProcessingEvent) { if ((SDL2 === undefined) || (SDL2.capture === undefined)) { return; } audioProcessingEvent.outputBuffer.getChannelData(0).fill(0.0); SDL2.capture.currentCaptureBuffer = audioProcessingEvent.inputBuffer; dynCall('vi', $2, [$3]); }; SDL2.capture.mediaStreamNode.connect(SDL2.capture.scriptProcessorNode); SDL2.capture.scriptProcessorNode.connect(SDL2.audioContext.destination); SDL2.capture.stream = stream; }; var no_microphone = function(error) { }; SDL2.capture.silenceBuffer = SDL2.audioContext.createBuffer($0, $1, SDL2.audioContext.sampleRate); SDL2.capture.silenceBuffer.getChannelData(0).fill(0.0); var silence_callback = function() { SDL2.capture.currentCaptureBuffer = SDL2.capture.silenceBuffer; dynCall('vi', $2, [$3]); }; SDL2.capture.silenceTimer = setTimeout(silence_callback, ($1 / SDL2.audioContext.sampleRate) * 1000); if ((navigator.mediaDevices !== undefined) && (navigator.mediaDevices.getUserMedia !== undefined)) { navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(have_microphone).catch(no_microphone); } else if (navigator.webkitGetUserMedia !== undefined) { navigator.webkitGetUserMedia({ audio: true, video: false }, have_microphone, no_microphone); }},  
- 70553: function($0, $1, $2, $3) {var SDL2 = Module['SDL2']; SDL2.audio.scriptProcessorNode = SDL2.audioContext['createScriptProcessor']($1, 0, $0); SDL2.audio.scriptProcessorNode['onaudioprocess'] = function (e) { if ((SDL2 === undefined) || (SDL2.audio === undefined)) { return; } SDL2.audio.currentOutputBuffer = e['outputBuffer']; dynCall('vi', $2, [$3]); }; SDL2.audio.scriptProcessorNode['connect'](SDL2.audioContext['destination']);},  
- 70963: function($0, $1) {var SDL2 = Module['SDL2']; var numChannels = SDL2.capture.currentCaptureBuffer.numberOfChannels; for (var c = 0; c < numChannels; ++c) { var channelData = SDL2.capture.currentCaptureBuffer.getChannelData(c); if (channelData.length != $1) { throw 'Web Audio capture buffer length mismatch! Destination size: ' + channelData.length + ' samples vs expected ' + $1 + ' samples!'; } if (numChannels == 1) { for (var j = 0; j < $1; ++j) { setValue($0 + (j * 4), channelData[j], 'float'); } } else { for (var j = 0; j < $1; ++j) { setValue($0 + (((j * numChannels) + c) * 4), channelData[j], 'float'); } } }},  
- 71568: function($0, $1) {var SDL2 = Module['SDL2']; var numChannels = SDL2.audio.currentOutputBuffer['numberOfChannels']; for (var c = 0; c < numChannels; ++c) { var channelData = SDL2.audio.currentOutputBuffer['getChannelData'](c); if (channelData.length != $1) { throw 'Web Audio output buffer length mismatch! Destination size: ' + channelData.length + ' samples vs expected ' + $1 + ' samples!'; } for (var j = 0; j < $1; ++j) { channelData[j] = HEAPF32[$0 + ((j*numChannels + c) << 2) >> 2]; } }},  
- 72048: function($0) {var SDL2 = Module['SDL2']; if ($0) { if (SDL2.capture.silenceTimer !== undefined) { clearTimeout(SDL2.capture.silenceTimer); } if (SDL2.capture.stream !== undefined) { var tracks = SDL2.capture.stream.getAudioTracks(); for (var i = 0; i < tracks.length; i++) { SDL2.capture.stream.removeTrack(tracks[i]); } SDL2.capture.stream = undefined; } if (SDL2.capture.scriptProcessorNode !== undefined) { SDL2.capture.scriptProcessorNode.onaudioprocess = function(audioProcessingEvent) {}; SDL2.capture.scriptProcessorNode.disconnect(); SDL2.capture.scriptProcessorNode = undefined; } if (SDL2.capture.mediaStreamNode !== undefined) { SDL2.capture.mediaStreamNode.disconnect(); SDL2.capture.mediaStreamNode = undefined; } if (SDL2.capture.silenceBuffer !== undefined) { SDL2.capture.silenceBuffer = undefined } SDL2.capture = undefined; } else { if (SDL2.audio.scriptProcessorNode != undefined) { SDL2.audio.scriptProcessorNode.disconnect(); SDL2.audio.scriptProcessorNode = undefined; } SDL2.audio = undefined; } if ((SDL2.audioContext !== undefined) && (SDL2.audio === undefined) && (SDL2.capture === undefined)) { SDL2.audioContext.close(); SDL2.audioContext = undefined; }}
+  64004: function($0, $1, $2) {var w = $0; var h = $1; var pixels = $2; if (!Module['SDL2']) Module['SDL2'] = {}; var SDL2 = Module['SDL2']; if (SDL2.ctxCanvas !== Module['canvas']) { SDL2.ctx = Module['createContext'](Module['canvas'], false, true); SDL2.ctxCanvas = Module['canvas']; } if (SDL2.w !== w || SDL2.h !== h || SDL2.imageCtx !== SDL2.ctx) { SDL2.image = SDL2.ctx.createImageData(w, h); SDL2.w = w; SDL2.h = h; SDL2.imageCtx = SDL2.ctx; } var data = SDL2.image.data; var src = pixels >> 2; var dst = 0; var num; if (typeof CanvasPixelArray !== 'undefined' && data instanceof CanvasPixelArray) { num = data.length; while (dst < num) { var val = HEAP32[src]; data[dst ] = val & 0xff; data[dst+1] = (val >> 8) & 0xff; data[dst+2] = (val >> 16) & 0xff; data[dst+3] = 0xff; src++; dst += 4; } } else { if (SDL2.data32Data !== data) { SDL2.data32 = new Int32Array(data.buffer); SDL2.data8 = new Uint8Array(data.buffer); } var data32 = SDL2.data32; num = data32.length; data32.set(HEAP32.subarray(src, src + num)); var data8 = SDL2.data8; var i = 3; var j = i + 4*num; if (num % 8 == 0) { while (i < j) { data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; data8[i] = 0xff; i = i + 4 | 0; } } else { while (i < j) { data8[i] = 0xff; i = i + 4 | 0; } } } SDL2.ctx.putImageData(SDL2.image, 0, 0); return 0;},  
+ 65459: function($0, $1, $2, $3, $4) {var w = $0; var h = $1; var hot_x = $2; var hot_y = $3; var pixels = $4; var canvas = document.createElement("canvas"); canvas.width = w; canvas.height = h; var ctx = canvas.getContext("2d"); var image = ctx.createImageData(w, h); var data = image.data; var src = pixels >> 2; var dst = 0; var num; if (typeof CanvasPixelArray !== 'undefined' && data instanceof CanvasPixelArray) { num = data.length; while (dst < num) { var val = HEAP32[src]; data[dst ] = val & 0xff; data[dst+1] = (val >> 8) & 0xff; data[dst+2] = (val >> 16) & 0xff; data[dst+3] = (val >> 24) & 0xff; src++; dst += 4; } } else { var data32 = new Int32Array(data.buffer); num = data32.length; data32.set(HEAP32.subarray(src, src + num)); } ctx.putImageData(image, 0, 0); var url = hot_x === 0 && hot_y === 0 ? "url(" + canvas.toDataURL() + "), auto" : "url(" + canvas.toDataURL() + ") " + hot_x + " " + hot_y + ", auto"; var urlBuf = _malloc(url.length + 1); stringToUTF8(url, urlBuf, url.length + 1); return urlBuf;},  
+ 66448: function($0) {if (Module['canvas']) { Module['canvas'].style['cursor'] = UTF8ToString($0); } return 0;},  
+ 66541: function() {if (Module['canvas']) { Module['canvas'].style['cursor'] = 'none'; }},  
+ 67766: function() {return screen.width;},  
+ 67793: function() {return screen.height;},  
+ 67866: function($0) {if (typeof Module['setWindowTitle'] !== 'undefined') { Module['setWindowTitle'](UTF8ToString($0)); } return 0;},  
+ 68020: function() {if (typeof(AudioContext) !== 'undefined') { return 1; } else if (typeof(webkitAudioContext) !== 'undefined') { return 1; } return 0;},  
+ 68186: function() {if ((typeof(navigator.mediaDevices) !== 'undefined') && (typeof(navigator.mediaDevices.getUserMedia) !== 'undefined')) { return 1; } else if (typeof(navigator.webkitGetUserMedia) !== 'undefined') { return 1; } return 0;},  
+ 68412: function($0) {if(typeof(Module['SDL2']) === 'undefined') { Module['SDL2'] = {}; } var SDL2 = Module['SDL2']; if (!$0) { SDL2.audio = {}; } else { SDL2.capture = {}; } if (!SDL2.audioContext) { if (typeof(AudioContext) !== 'undefined') { SDL2.audioContext = new AudioContext(); } else if (typeof(webkitAudioContext) !== 'undefined') { SDL2.audioContext = new webkitAudioContext(); } } return SDL2.audioContext === undefined ? -1 : 0;},  
+ 68895: function() {var SDL2 = Module['SDL2']; return SDL2.audioContext.sampleRate;},  
+ 68965: function($0, $1, $2, $3) {var SDL2 = Module['SDL2']; var have_microphone = function(stream) { if (SDL2.capture.silenceTimer !== undefined) { clearTimeout(SDL2.capture.silenceTimer); SDL2.capture.silenceTimer = undefined; } SDL2.capture.mediaStreamNode = SDL2.audioContext.createMediaStreamSource(stream); SDL2.capture.scriptProcessorNode = SDL2.audioContext.createScriptProcessor($1, $0, 1); SDL2.capture.scriptProcessorNode.onaudioprocess = function(audioProcessingEvent) { if ((SDL2 === undefined) || (SDL2.capture === undefined)) { return; } audioProcessingEvent.outputBuffer.getChannelData(0).fill(0.0); SDL2.capture.currentCaptureBuffer = audioProcessingEvent.inputBuffer; dynCall('vi', $2, [$3]); }; SDL2.capture.mediaStreamNode.connect(SDL2.capture.scriptProcessorNode); SDL2.capture.scriptProcessorNode.connect(SDL2.audioContext.destination); SDL2.capture.stream = stream; }; var no_microphone = function(error) { }; SDL2.capture.silenceBuffer = SDL2.audioContext.createBuffer($0, $1, SDL2.audioContext.sampleRate); SDL2.capture.silenceBuffer.getChannelData(0).fill(0.0); var silence_callback = function() { SDL2.capture.currentCaptureBuffer = SDL2.capture.silenceBuffer; dynCall('vi', $2, [$3]); }; SDL2.capture.silenceTimer = setTimeout(silence_callback, ($1 / SDL2.audioContext.sampleRate) * 1000); if ((navigator.mediaDevices !== undefined) && (navigator.mediaDevices.getUserMedia !== undefined)) { navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(have_microphone).catch(no_microphone); } else if (navigator.webkitGetUserMedia !== undefined) { navigator.webkitGetUserMedia({ audio: true, video: false }, have_microphone, no_microphone); }},  
+ 70617: function($0, $1, $2, $3) {var SDL2 = Module['SDL2']; SDL2.audio.scriptProcessorNode = SDL2.audioContext['createScriptProcessor']($1, 0, $0); SDL2.audio.scriptProcessorNode['onaudioprocess'] = function (e) { if ((SDL2 === undefined) || (SDL2.audio === undefined)) { return; } SDL2.audio.currentOutputBuffer = e['outputBuffer']; dynCall('vi', $2, [$3]); }; SDL2.audio.scriptProcessorNode['connect'](SDL2.audioContext['destination']);},  
+ 71027: function($0, $1) {var SDL2 = Module['SDL2']; var numChannels = SDL2.capture.currentCaptureBuffer.numberOfChannels; for (var c = 0; c < numChannels; ++c) { var channelData = SDL2.capture.currentCaptureBuffer.getChannelData(c); if (channelData.length != $1) { throw 'Web Audio capture buffer length mismatch! Destination size: ' + channelData.length + ' samples vs expected ' + $1 + ' samples!'; } if (numChannels == 1) { for (var j = 0; j < $1; ++j) { setValue($0 + (j * 4), channelData[j], 'float'); } } else { for (var j = 0; j < $1; ++j) { setValue($0 + (((j * numChannels) + c) * 4), channelData[j], 'float'); } } }},  
+ 71632: function($0, $1) {var SDL2 = Module['SDL2']; var numChannels = SDL2.audio.currentOutputBuffer['numberOfChannels']; for (var c = 0; c < numChannels; ++c) { var channelData = SDL2.audio.currentOutputBuffer['getChannelData'](c); if (channelData.length != $1) { throw 'Web Audio output buffer length mismatch! Destination size: ' + channelData.length + ' samples vs expected ' + $1 + ' samples!'; } for (var j = 0; j < $1; ++j) { channelData[j] = HEAPF32[$0 + ((j*numChannels + c) << 2) >> 2]; } }},  
+ 72112: function($0) {var SDL2 = Module['SDL2']; if ($0) { if (SDL2.capture.silenceTimer !== undefined) { clearTimeout(SDL2.capture.silenceTimer); } if (SDL2.capture.stream !== undefined) { var tracks = SDL2.capture.stream.getAudioTracks(); for (var i = 0; i < tracks.length; i++) { SDL2.capture.stream.removeTrack(tracks[i]); } SDL2.capture.stream = undefined; } if (SDL2.capture.scriptProcessorNode !== undefined) { SDL2.capture.scriptProcessorNode.onaudioprocess = function(audioProcessingEvent) {}; SDL2.capture.scriptProcessorNode.disconnect(); SDL2.capture.scriptProcessorNode = undefined; } if (SDL2.capture.mediaStreamNode !== undefined) { SDL2.capture.mediaStreamNode.disconnect(); SDL2.capture.mediaStreamNode = undefined; } if (SDL2.capture.silenceBuffer !== undefined) { SDL2.capture.silenceBuffer = undefined } SDL2.capture = undefined; } else { if (SDL2.audio.scriptProcessorNode != undefined) { SDL2.audio.scriptProcessorNode.disconnect(); SDL2.audio.scriptProcessorNode = undefined; } SDL2.audio = undefined; } if ((SDL2.audioContext !== undefined) && (SDL2.audio === undefined) && (SDL2.capture === undefined)) { SDL2.audioContext.close(); SDL2.audioContext = undefined; }}
 };
 
 // Avoid creating a new array
@@ -1981,7 +1976,7 @@ function _emscripten_asm_const_iii(code, sigPtr, argbuf) {
 
 
 
-// STATICTOP = STATIC_BASE + 98464;
+// STATICTOP = STATIC_BASE + 98528;
 /* global initializers */  __ATINIT__.push({ func: function() { ___wasm_call_ctors() } });
 
 
@@ -2537,6 +2532,20 @@ function _emscripten_asm_const_iii(code, sigPtr, argbuf) {
         },write:function(stream, buffer, offset, length, position, canOwn) {
           // The data buffer should be a typed array view
           assert(!(buffer instanceof ArrayBuffer));
+          // If the buffer is located in main memory (HEAP), and if
+          // memory can grow, we can't hold on to references of the
+          // memory buffer, as they may get invalidated. That means we
+          // need to do copy its contents.
+          if (buffer.buffer === HEAP8.buffer) {
+            // FIXME: this is inefficient as the file packager may have
+            //        copied the data into memory already - we may want to
+            //        integrate more there and let the file packager loading
+            //        code be able to query if memory growth is on or off.
+            if (canOwn) {
+              warnOnce('file packager has copied file data into memory, but in memory growth we are forced to copy it again (see --no-heap-copy)');
+            }
+            canOwn = false;
+          }
   
           if (!length) return 0;
           var node = stream.node;
@@ -6512,7 +6521,7 @@ function _emscripten_asm_const_iii(code, sigPtr, argbuf) {
     }
 
   function _emscripten_get_sbrk_ptr() {
-      return 99328;
+      return 99392;
     }
 
   function _emscripten_glActiveTexture(x0) { GLctx['activeTexture'](x0) }
@@ -7945,8 +7954,62 @@ function _emscripten_asm_const_iii(code, sigPtr, argbuf) {
   
   function abortOnCannotGrowMemory(requestedSize) {
       abort('Cannot enlarge memory arrays to size ' + requestedSize + ' bytes (OOM). Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + HEAP8.length + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which allows increasing the size at runtime, or (3) if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
+    }
+  
+  function emscripten_realloc_buffer(size) {
+      try {
+        // round size grow request up to wasm page size (fixed 64KB per spec)
+        wasmMemory.grow((size - buffer.byteLength + 65535) >> 16); // .grow() takes a delta compared to the previous size
+        updateGlobalBufferAndViews(wasmMemory.buffer);
+        return 1 /*success*/;
+      } catch(e) {
+        console.error('emscripten_realloc_buffer: Attempted to grow heap from ' + buffer.byteLength  + ' bytes to ' + size + ' bytes, but got error: ' + e);
+      }
     }function _emscripten_resize_heap(requestedSize) {
-      abortOnCannotGrowMemory(requestedSize);
+      var oldSize = _emscripten_get_heap_size();
+      // With pthreads, races can happen (another thread might increase the size in between), so return a failure, and let the caller retry.
+      assert(requestedSize > oldSize);
+  
+  
+      var PAGE_MULTIPLE = 65536;
+  
+      // Memory resize rules:
+      // 1. When resizing, always produce a resized heap that is at least 16MB (to avoid tiny heap sizes receiving lots of repeated resizes at startup)
+      // 2. Always increase heap size to at least the requested size, rounded up to next page multiple.
+      // 3a. If MEMORY_GROWTH_LINEAR_STEP == -1, excessively resize the heap geometrically: increase the heap size according to 
+      //                                         MEMORY_GROWTH_GEOMETRIC_STEP factor (default +20%),
+      //                                         At most overreserve by MEMORY_GROWTH_GEOMETRIC_CAP bytes (default 96MB).
+      // 3b. If MEMORY_GROWTH_LINEAR_STEP != -1, excessively resize the heap linearly: increase the heap size by at least MEMORY_GROWTH_LINEAR_STEP bytes.
+      // 4. Max size for the heap is capped at 2048MB-PAGE_MULTIPLE, or by WASM_MEM_MAX, or by ASAN limit, depending on which is smallest
+      // 5. If we were unable to allocate as much memory, it may be due to over-eager decision to excessively reserve due to (3) above.
+      //    Hence if an allocation fails, cut down on the amount of excess growth, in an attempt to succeed to perform a smaller allocation.
+  
+      var maxHeapSize = 2147483648 - PAGE_MULTIPLE;
+      if (requestedSize > maxHeapSize) {
+        err('Cannot enlarge memory, asked to go up to ' + requestedSize + ' bytes, but the limit is ' + maxHeapSize + ' bytes!');
+        return false;
+      }
+  
+      var minHeapSize = 16777216;
+  
+      // Loop through potential heap size increases. If we attempt a too eager reservation that fails, cut down on the
+      // attempted size and reserve a smaller bump instead. (max 3 times, chosen somewhat arbitrarily)
+      for(var cutDown = 1; cutDown <= 4; cutDown *= 2) {
+        var overGrownHeapSize = oldSize * (1 + 0.2 / cutDown); // ensure geometric growth
+        // but limit overreserving (default to capping at +96MB overgrowth at most)
+        overGrownHeapSize = Math.min(overGrownHeapSize, requestedSize + 100663296 );
+  
+  
+        var newSize = Math.min(maxHeapSize, alignUp(Math.max(minHeapSize, requestedSize, overGrownHeapSize), PAGE_MULTIPLE));
+  
+        var replacement = emscripten_realloc_buffer(newSize);
+        if (replacement) {
+  
+          return true;
+        }
+      }
+      err('Failed to grow the heap from ' + oldSize + ' bytes to ' + newSize + ' bytes, not enough memory!');
+      return false;
     }
 
   function _emscripten_sample_gamepad_data() {
