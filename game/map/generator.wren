@@ -63,6 +63,9 @@ class MapGen {
     _startRoom = _pg.select(_rooms)
     var roomGen = RoomGenerator.new(_pg, _root, _map) 
     for(r in _rooms){
+      roomGen.connect(r)
+    }
+    for(r in _rooms){
       roomGen.generate(r)
       addLights(r) 
     }

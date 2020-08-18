@@ -38,7 +38,10 @@ GameSystem.attach("main"){|s|
   playerState["yaw"] = yaw
 
   queue.subscribe(MapEvents.Load){|ev|
+
     var graph = ev.payload.graph
+    var map = ev.payload.map
+
     var c = ev.payload.startRoom.center()
     Vec3.set(c[0],0,c[1], pos)
     

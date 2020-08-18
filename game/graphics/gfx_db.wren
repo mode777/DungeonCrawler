@@ -15,7 +15,7 @@ class GfxDb {
   
   construct new(filename){
     _img = Image.fromFile(filename)
-    _txt = Texture.fromImage(_img, { "magFilter": TextureFilters.Nearest, "minFilter": TextureFilters.NearestMipmapLinear, "mipmaps": true })
+    _txt = Texture.fromImage(_img, { "magFilter": TextureFilters.Nearest, "minFilter": TextureFilters.Nearest, "mipmaps": false })
     _tileset = Tileset.new(256/32,1024/32,32,32)
     _scale = 5
 

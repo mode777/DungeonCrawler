@@ -89,6 +89,7 @@ class Grid {
     _default = default
     _seed = seed
     _neighbours = List.filled(4, null)
+    _neighbourIds = List.filled(4, null)
     clear()
   }
 
@@ -97,10 +98,12 @@ class Grid {
   }
 
   [i] {
+    if(isOutOfBounds(i)) return _default
     return _data[i]
   }
 
   [i]=(v) {
+    if(isOutOfBounds(i)) return
     _data[i] = v
   }
 
@@ -114,8 +117,25 @@ class Grid {
     _data[y*_w+x] = v
   }
 
+  id(x,y){
+    return y*_w+x
+  }
+
+  id(vec2){
+    return vec2[1]*_w+vec2[0]
+  }
+
+  coords(id, vec2){
+    vec2[0] = id % _w
+    vec2[1] = (id / _w).floor
+  }
+
   isOutOfBounds(x,y){
     return y < 0 || y >= _h || x < 0 || x >= _w
+  }
+
+  isOutOfBounds(id){
+    return id < 0 || id >= _data.count
   }
 
   neighbours(x,y){
@@ -128,15 +148,29 @@ class Grid {
     return _neighbours 
   }
 
+  neighbourIds(id){
+    var x = id % _w
+    var y = (id / _w).floor
+    _neighbourIds[0] = this.id(x+1,y) 
+    _neighbourIds[1] = this.id(x-1,y) 
+    _neighbourIds[2] = this.id(x,y-1) 
+    _neighbourIds[3] = this.id(x,y+1)
+    return _neighbourIds 
+  }
+
   iterate(val) { _data.iterate(val)  }
   iteratorValue(val) { _data.iteratorValue(val) }
 
-  fill(fn) {
-    for(y in 0..._h){
-      for(x in 0..._w){
-        this[x,y] = fn.call(x,y)
+  fill(x, y, w, h, fn) {
+    for(oy in y...y+h){
+      for(ox in x...x+w){
+        this[ox,oy] = fn.call(ox,oy)
       }
     }
+  }
+
+  fill(fn){
+    fill(0,0,_w,_h,fn)
   }
 
   forEachXY(fn){
@@ -149,10 +183,18 @@ class Grid {
 
   subGrid(x,y,w,h){
     var grid = Grid.new(w,h,_default,_seed)
-    this.forEachXY {|ox,oy,v|
-      grid[ox+x,oy+y] = v
+    for(oy in y...y+h){
+      for(ox in x...x+w){
+        grid[ox-x, oy-y] = this[x, y]
+      }
     }
     return grid
+  }
+
+  putGrid(grid, x, y){
+    grid.forEachXY {|ox,oy,v|
+      this[x+ox,y+oy] = v
+    }
   }
 }
 

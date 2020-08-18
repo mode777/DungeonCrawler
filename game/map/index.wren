@@ -7,7 +7,7 @@ GameSystem.attach("main"){|s|
 
 
   queue.subscribe(SystemEvents.Init){|ev|
-    var mapState = MapGen.new(64,64, 4)
+    var mapState = MapGen.new(64,64, 6)
     var loadEvent = GameEvent.new(MapEvents.Load, mapState)
     queue.add(loadEvent)
   }
