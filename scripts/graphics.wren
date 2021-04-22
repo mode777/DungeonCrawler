@@ -4,7 +4,18 @@ import "io" for File
 import "geometry" for AttributeType
 import "memory" for MapUtil
 
+class Color {
+  static new(r,g,b,a){
+    return [r,g,b,a]
+  }
+
+  static new(r,g,b){
+    return Color.new(r,g,b,255)
+  }
+}
+
 class Colors {
+ 
   static init() {
     __transparent = [0,0,0,0]
     __white = [255,255,255,255]
@@ -107,6 +118,7 @@ foreign class Texture {
   foreign createMipmaps()
   foreign width()
   foreign height()
+  foreign copyImage(img, x, y)
 
   // private
   foreign image(img)

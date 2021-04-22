@@ -2,16 +2,17 @@ import "math" for Mat4, Noise, Vec3, Vec4
 import "memory" for Grid
 import "platform" for Application, Event, Keyboard
 
-import "./game/events" for SystemEvents, InputEvents, PlayerEvents, MapEvents
+import "./game/events" for SystemEvents, InputEvents, PlayerEvents, MapEvents, ActorEvents
 import "./game/infrastructure" for EventQueue, GameEvent, GameSystem
 
 GameSystem.attach("main"){|s|
   var queue = s.queue
 
-  var playerState = {}
+  var playerState = {"id": "player"}
   var moveEvent = GameEvent.new(PlayerEvents.Move, playerState)
   var roomEvent = GameEvent.new(PlayerEvents.Room, null)
   var initEvent = GameEvent.new(PlayerEvents.Init, playerState)
+  var shootEvent = GameEvent.new(ActorEvents.Shoot, playerState)
 
   var pos = Vec3.zero()
   var yaw = 0
@@ -80,6 +81,9 @@ GameSystem.attach("main"){|s|
       }
       if(inputState["turn_right"]){
         yaw = yaw + 0.03
+      }
+      if(inputState["shoot"]){
+        queue.add(shootEvent)
       }
 
       updatePlayerPos.call()

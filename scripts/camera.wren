@@ -34,7 +34,7 @@ class OrthograficCamera is Camera {
   }
 
   scale(x,y){
-    _view.scale(x,y)
+    _view.scale(x,y, 1)
   }
 
   rotate(r){

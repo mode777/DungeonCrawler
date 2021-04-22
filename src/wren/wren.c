@@ -143,8 +143,8 @@ void pglInitWren(int argc, char **argv)
   
   config.errorFn = errorFunc;
   config.writeFn = writeFunc;
-  config.bindForeignMethodFn = bindMethodFunc;
   config.loadModuleFn = loadModule;
+  config.bindForeignMethodFn = bindMethodFunc;
   config.bindForeignClassFn = bindClassFunc;
 
   vm = wrenNewVM(&config); 

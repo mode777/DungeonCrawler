@@ -20,6 +20,8 @@ void Window_config_3(WrenVM* vm){
   pglWindowConfig(&win);
 }
 
+
+
 void Application_logLevel_1(WrenVM* vm){
   int sev = (int)wrenGetSlotDouble(vm,1);
   pglLogLevel(sev);

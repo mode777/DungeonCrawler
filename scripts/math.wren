@@ -71,6 +71,11 @@ class Vec2 {
     dst[1] = a[1] * v
   }
 
+  static divV(a,v,dst){
+    dst[0] = a[0]/v
+    dst[1] = a[1]/v
+  }
+
   static sign(src,dst){
     dst[0] = src[0] > 0 ? 1 : (src[0] < 0 ? -1 : 0)
     dst[1] = src[1] > 0 ? 1 : (src[1] < 0 ? -1 : 0)

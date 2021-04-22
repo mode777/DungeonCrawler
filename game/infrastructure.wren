@@ -1,4 +1,4 @@
-import "data" for Ringbuffer
+import "data" for Queue
 import "./game/events" for SystemEvents
 
 class GameEvent {
@@ -23,7 +23,7 @@ class EventQueue {
   count { _queue.count  }
 
   construct new(size){
-    _queue = Ringbuffer.new(size)
+    _queue = Queue.new(size)
     _handlers = {}
     _debug = false
     _profile = false

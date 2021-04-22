@@ -47,6 +47,14 @@ class Quad {
   toString(){
     return [x,y,w,h]
   }
+
+  isInside(x,y){
+    return x >= a[0] && x < c[0] && y >= a[1] && y < c[1]  
+  }
+
+  isInside(vec){
+    return vec[0] >= a[0] && vec[0] < c[0] && vec[1] >= a[1] && vec[1] < c[1]
+  }
 }
 
 var EmptyQuad = Quad.new(0,0,0,0)
@@ -148,6 +156,7 @@ class AbstractBatch {
 class SpriteBatch is AbstractBatch {
 
   construct new(texture, size){
+    if(!texture is Texture) Fiber.abort("Input must be texture")
     super(texture, size, 2)
     _colors = UByteVecAccessor.new(4*size,4)
     _colorsGBuffer = GraphicsBuffer.forVertices(_colors.bufferView, BufferUsage.Dynamic)

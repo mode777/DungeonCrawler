@@ -1,24 +1,33 @@
 foreign class Image {  
   construct new(width, height){
-    allocate(width, height)
+    allocate(width, height, 4)
+  }
+  construct new(width, height, channels){
+    allocate(width, height, channels)
   }
   construct fromBuffer(buf){
-    buffer(buf, 0, buffer.size)
+    buffer(buf, 0, buf.size, 4)
+  }
+  construct fromBuffer(buf, channels){
+    buffer(buf, 0, buf.size, channels)
   }
   construct fromBufferView(view){
-    buffer(view.buffer, view.offset, view.size)
+    buffer(view.buffer, view.offset, view.size, 4)
+  }
+  construct fromBufferView(view, channels){
+    buffer(view.buffer, view.offset, view.size, channels)
   }
   construct fromFile(path){
-    load(path)
+    load(path, 4)
   }
 
   width { getWidth() }
   height { getHeight() }
 
   //private 
-  foreign load(path)
-  foreign buffer(buffer, offset, size)
-  foreign allocate(width, height)
+  foreign load(path, channels)
+  foreign buffer(buffer, offset, size, channels)
+  foreign allocate(width, height, channels)
 
   // public
   foreign put(imgData, sx, sy, sw, sh, dx, dy)
@@ -28,9 +37,8 @@ foreign class Image {
   put(imgData, dx, dy){
     put(imgData, 0, 0, imgData.width, imgData.height, dx, dy)
   }
-  foreign setPixel(x, y, r, g, b, a)
-  foreign setPixel(x, y, vec4)
-  foreign getPixel(x, y, vec4)
+  foreign setPixel(x, y, vec)
+  foreign getPixel(x, y, vec)
   foreign getPixelInt(x,y)
   foreign save(filename)
 

@@ -16,6 +16,7 @@ GameSystem.attach("main"){|s|
     inputState["turn_right"] = Keyboard.isDown("Right")
     inputState["strafe_left"] = Keyboard.isDown("A")
     inputState["strafe_right"] = Keyboard.isDown("D")
+    inputState["shoot"] = Keyboard.isDown("Space")
     queue.add(inputEvent)
   }
 }

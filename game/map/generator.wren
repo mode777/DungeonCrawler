@@ -50,9 +50,7 @@ class MapGen {
       "ghost",
       "beholder",
     ]
-    _itemList = [
-      "chest"
-    ]
+    
     generate()
   }
 
@@ -67,17 +65,8 @@ class MapGen {
     }
     for(r in _rooms){
       roomGen.generate(r)
-      addLights(r) 
     }
     _img = _map.toImage()
-  }
-
-  addLights(n){
-    var amounts = (n.w*n.h / 10).floor
-    for(i in 0...amounts){
-      var l = Light.new(_pg.range(n.x+1,n.x+n.w,0),_pg.range(n.y+1,n.y+n.h,0), _pg.color(), _pg.float(0.1,1))
-      _lights.add(l)  
-    }
   }
 
   addEnemies(n){
@@ -91,16 +80,16 @@ class MapGen {
     }
   }
 
-  addItems(n){
-    var amounts = (n.w*n.h / 30).floor
-    for(i in 0...amounts){
-      var e = Item.new(
-        _pg.range(n.x+1,n.x+n.w,0),
-        _pg.range(n.y+1,n.y+n.h,0), 
-        _pg.select(_itemList))
-      _items.add(e)  
-    }
-  }
+  // addItems(n){
+  //   var amounts = (n.w*n.h / 30).floor
+  //   for(i in 0...amounts){
+  //     var e = Item.new(
+  //       _pg.range(n.x+1,n.x+n.w,0),
+  //       _pg.range(n.y+1,n.y+n.h,0), 
+  //       _pg.select(_itemList))
+  //     _items.add(e)  
+  //   }
+  // }
 
   split(n){
     if(n.w * n.h > (_threshold * _threshold * 5)){

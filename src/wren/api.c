@@ -54,11 +54,10 @@ void pgl_wren_bind_api(){
   
   //image
   pgl_wren_bind_class("image.Image", Image_allocate, Image_finalize);
-  pgl_wren_bind_method("image.Image.load(_)", Image_load_1);
-  pgl_wren_bind_method("image.Image.buffer(_,_,_)", Image_buffer_3);
-  pgl_wren_bind_method("image.Image.allocate(_,_)", Image_allocate_2);
+  pgl_wren_bind_method("image.Image.load(_,_)", Image_load_2);
+  pgl_wren_bind_method("image.Image.buffer(_,_,_,_)", Image_buffer_4);
+  pgl_wren_bind_method("image.Image.allocate(_,_,_)", Image_allocate_3);
   pgl_wren_bind_method("image.Image.put(_,_,_,_,_,_,_)", Image_put_7);
-  pgl_wren_bind_method("image.Image.setPixel(_,_,_,_,_,_)", Image_setPixel_6);
   pgl_wren_bind_method("image.Image.setPixel(_,_,_)", Image_setPixel_3);
   pgl_wren_bind_method("image.Image.getPixel(_,_,_)", Image_getPixel_3);
   pgl_wren_bind_method("image.Image.getPixelInt(_,_)", Image_getPixelInt_2);
@@ -97,6 +96,7 @@ void pgl_wren_bind_api(){
   pgl_wren_bind_method("graphics.Texture.minFilter(_)", Texture_minFilter_1);
   pgl_wren_bind_method("graphics.Texture.wrap(_,_)", Texture_wrap_2);
   pgl_wren_bind_method("graphics.Texture.createMipmaps()", Texture_createMipmaps_0);
+  pgl_wren_bind_method("graphics.Texture.copyImage(_,_,_)", Texture_copyImage_3);
   pgl_wren_bind_class("graphics.GraphicsBuffer", GraphicsBuffer_allocate, GraphicsBuffer_finalize);
   pgl_wren_bind_method("graphics.GraphicsBuffer.init(_,_,_,_,_)", GraphicsBuffer_init_5);
   pgl_wren_bind_method("graphics.GraphicsBuffer.subData(_,_,_,_)", GraphicsBuffer_subData_4);

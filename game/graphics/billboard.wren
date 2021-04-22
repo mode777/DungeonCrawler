@@ -56,6 +56,7 @@ class Billboard{
 class BillboardBatch {
 
   transform { _quads.transform }
+  count { _quadCount }
 
   construct new(texture, size, billboardSize){
     _quads = QuadBatch.new(texture, size)

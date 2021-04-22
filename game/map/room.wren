@@ -3,7 +3,7 @@ import "image" for Image
 import "2d" for Tileset, AbstractBatch, SpriteBatch, Quad
 import "container" for GlobalContainer
 import "graphics" for Colors
-import "data" for Ringbuffer
+import "data" for Queue
 
 import "./game/map/random" for ProdGen
 import "./game/map/map" for LevelMap, LevelElement
@@ -15,13 +15,19 @@ class RoomGenerator {
     _pg = pg
     _graph = graph
     _map = map
+    _itemList = [
+      "chest"
+    ]
   }
 
   generate(n) {
     //fill(n)
     n["lights"] = []
+    n["enemies"] = []
+    n["items"] = []
     populate(n)
     lights(n)
+    items(n)
   }
 
   populate(n){
@@ -86,8 +92,8 @@ class RoomGenerator {
 
       lights.add(Light.new(co[0]+ox, co[1]+oy, _pg.color(), 1))
 
-      var w = _pg.size(grid.width, grid.width/3).floor
-      var h = _pg.size(grid.height, grid.height/3).floor
+      var w = _pg.size(grid.width, grid.width/2).floor
+      var h = _pg.size(grid.height, grid.height/2).floor
       grid.fill(co[0]-(w/2).floor,co[1]-(h/2).floor,w,h) {|ox,oy| LevelElement.Floor }
       grid[id] = LevelElement.Floor
     }  	
@@ -106,6 +112,26 @@ class RoomGenerator {
     // lights.add(Light.new(n.x+n.w-1, n.y+1, _pg.color(), 1))
     // lights.add(Light.new(n.x+n.w-1, n.y+n.h-1, _pg.color(), 1))
     // lights.add(Light.new(n.x+1, n.y+n.h-1, _pg.color(), 1))
+  }
+
+  items(n){
+    var items = n["items"]
+    for(y in n.y...n.y+n.h){
+      for(x in n.x...n.x+n.w){
+        if(!_map[x,y].isSolid){
+          var chance = 0
+          for(a in -1..1){
+            for(b in -1..1){
+              if(_map[x+a,y+b].isSolid) chance = chance + 1
+            }
+          }
+          if(_pg.roll(chance)){
+            var item = Item.new(x,y,_pg.select(_itemList))
+            items.add(item)
+          }
+        }        
+      }
+    }
   }
 
   isFree(x,y, w,h){

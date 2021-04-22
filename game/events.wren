@@ -21,3 +21,7 @@ class PlayerEvents {
   static Room { "plr-room" }
 }
 
+class ActorEvents {
+
+  static Shoot { "act-shoot" }
+}

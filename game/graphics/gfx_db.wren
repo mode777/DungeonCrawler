@@ -1,10 +1,15 @@
 import "image" for Image
 import "graphics" for Texture, TextureFilters
-import "2d" for Tileset
+import "2d" for Tileset, Quad
 
 import "./game/graphics/billboard" for BillboardProto
 
 class GfxDb {
+
+  static instance {
+    __instance = __instance || GfxDb.new("./assets/fantasy-tileset.png")
+    return __instance
+  }
   
   image { _img }
   texture { _txt }
@@ -73,7 +78,7 @@ class GfxDb {
       "mummy": BillboardProto.new(_scale, _tileset[5,21],-0.25, 1),
       "ghost": BillboardProto.new(_scale, _tileset[6,21],-0.25, 1),
       "beholder": BillboardProto.new(_scale, _tileset[7,21],-0.25, 1),
-
+      "shuriken": BillboardProto.new(_scale, _tileset[0,9], 0, 0.5)
     }
   }
 }

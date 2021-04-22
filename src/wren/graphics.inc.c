@@ -28,6 +28,32 @@ static void Texture_image_1(WrenVM* vm){
   txt->height = img->height;
 }
 
+static void Texture_copyImage_3(WrenVM* vm){
+  PGLTexture* txt = ((PGLTexture*)wrenGetSlotForeign(vm, 0));
+  PGLImage* img = *((PGLImage**)wrenGetSlotForeign(vm, 1));
+  int x = (int)wrenGetSlotDouble(vm, 2);
+  int y = (int)wrenGetSlotDouble(vm, 3);
+
+  GLenum pixelType;
+
+  switch(img->channels){
+    case 1:
+      pixelType = GL_LUMINANCE;
+      break;
+    case 2:
+      pixelType = GL_LUMINANCE_ALPHA;
+      break;
+    case 3:
+      pixelType = GL_RGB;
+      break;
+    case 4:
+      pixelType = GL_RGBA;
+      break;
+  }
+  glBindTexture(GL_TEXTURE_2D, txt->handle);
+  glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, img->width, img->height, pixelType, GL_UNSIGNED_BYTE, img->pixels);
+}
+
 static void Texture_width_0(WrenVM* vm){
   PGLTexture* txt = ((PGLTexture*)wrenGetSlotForeign(vm, 0));
   wrenSetSlotDouble(vm, 0, (double)txt->width);

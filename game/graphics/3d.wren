@@ -13,7 +13,19 @@ import "./game/graphics/cube" for CubeBatch
 import "./game/events" for SystemEvents, MapEvents, PlayerEvents
 import "./game/infrastructure" for EventQueue, GameEvent, GameSystem
 
-class GeometryBuilder {
+class Area {
+
+  geometry { _geo }
+  items { _items }
+
+  construct new(geometry, items){
+    _geo = geometry
+    _items = items
+  }
+}
+
+
+class AreaBuilder {
   
   construct new(map, gfxDb){
     _map = map
@@ -29,8 +41,24 @@ class GeometryBuilder {
     }
   }
 
+  generateItems(node){
+    var list = node["items"]
+    var items = BillboardBatch.new(_gfxDb.texture, list.count, _gfxDb.scale)
+    var lights = node["lightmap"]
+
+    for(e in list){
+      var type = _gfxDb.billboards[e.type]
+      var inst = type.instance(e.x,e.y)
+      var l = lights[e.x-node.x,e.y-node.y]
+      //System.print([inst, l])
+      items.addBillboard(inst, l)
+    }
+    return items
+  }
+
   generateArea(node){
     generateLights(node)
+    var items = generateItems(node)
     var lightmap = node["lightmap"]
 
     var cubes = CubeBatch.new(_gfxDb.texture, node.w * node.h, _gfxDb.scale)
@@ -58,7 +86,7 @@ class GeometryBuilder {
       }
     }
 
-    return cubes
+    return Area.new(cubes, items)
   }
 
 }
@@ -71,9 +99,8 @@ GameSystem.attach("main"){|s|
   var gfx
   var gfxDb
   var cam
-  var cubes
+  var currentArea
   var billboards
-  var items
   var lights
   var map
   var enemies
@@ -98,18 +125,13 @@ GameSystem.attach("main"){|s|
     }
   }
 
-  var addItems = Fn.new{
-    var itemsList = mapState.items
-    for(e in itemsList){
-      items.addBillboard(gfxDb.billboards[e.type].instance(e.x,e.y),lights[e.x,e.y])
-    }
-  }
+  
 
   queue.subscribe(SystemEvents.Init){|ev|
     gfx = Gfx.fromFiles()
     cam = PointAtCamera.new()
     cam.far = 500
-    gfxDb = GfxDb.new("./assets/fantasy-tileset.png")
+    gfxDb = GfxDb.instance
   }
 
   queue.subscribeCombined([MapEvents.Load,PlayerEvents.Init]){|evs|
@@ -118,22 +140,22 @@ GameSystem.attach("main"){|s|
     map = mapState.map
     
     billboards = BillboardBatch.new(gfxDb.texture, 4096, gfxDb.scale)
-    items = BillboardBatch.new(gfxDb.texture, 4096, gfxDb.scale)
 
-    var geoGen = GeometryBuilder.new(map, gfxDb)
+    var geoGen = AreaBuilder.new(map, gfxDb)
 
     for(r in mapState.rooms){
-      r["geometry"] = geoGen.generateArea(r)
+      r["area"] = geoGen.generateArea(r)
     }
-    cubes = mapState.startRoom["geometry"]
+    currentArea = mapState.startRoom["area"]
+    currentRoom = mapState.startRoom
 
     addEnemies.call()
-    addItems.call()
+    //addItems.call()
     updateEnemies.call()
 
     queue.subscribe(PlayerEvents.Room){|ev|
-      cubes = ev.payload["geometry"]
-      System.print("Room changed")
+      currentArea = ev.payload["area"]
+      currentRoom = ev.payload
     }
 
     queue.subscribe(SystemEvents.Update){|ev|
@@ -148,16 +170,19 @@ GameSystem.attach("main"){|s|
 
       var yaw = playerState["yaw"]
       billboards.update(yaw)
-      items.update(yaw)     
+      currentArea.items.update(yaw)     
     }
 
     queue.subscribe(SystemEvents.Draw1){|ev|
       gfx.enable()
       cam.enable()
       Renderer.setUniformVec3(UniformType.FogColor, [12,50,49])
-      cubes.draw()
+      currentArea.geometry.draw()
+      currentArea.items.draw()
+      if(currentRoom["projectile-billboards"]){
+        currentRoom["projectile-billboards"].draw()
+      }
       billboards.draw()
-      items.draw()
     }
 
   }

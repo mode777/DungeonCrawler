@@ -1,9 +1,9 @@
 import "augur" for Augur, Assert
-import "data" for Ringbuffer
+import "data" for Queue
 
-Augur.describe("Ringbuffer") {
+Augur.describe("Queue") {
   Augur.it("enqueues"){
-    var uut = Ringbuffer.new(2)
+    var uut = Queue.new(2)
 
     uut.enqueue(1)
     uut.enqueue(2)
@@ -13,7 +13,7 @@ Augur.describe("Ringbuffer") {
   }
 
   Augur.it("dequeues"){
-    var uut = Ringbuffer.new(2)
+    var uut = Queue.new(2)
 
     uut.enqueue(1)
     uut.enqueue(2)

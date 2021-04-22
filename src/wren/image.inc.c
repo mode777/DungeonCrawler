@@ -14,37 +14,40 @@ static void Image_finalize(void* data){
   pglImageDestroy(*img);
 }
 
-static void Image_load_1(WrenVM* vm){
+static void Image_load_2(WrenVM* vm){
   PGLImage** handle = (PGLImage**)wrenGetSlotForeign(vm, 0); 
   const char* path = wrenGetSlotString(vm, 1);  
-  PGLImage* image = pglImageLoad(path, 4);
+  int channels = (int)wrenGetSlotDouble(vm, 2);  
+  PGLImage* image = pglImageLoad(path, channels);
   if(image == NULL){
     pgl_wren_runtime_error(vm, "File not found");
   }
   *handle = image;  
 }
 
-static void Image_buffer_3(WrenVM* vm){
+static void Image_buffer_4(WrenVM* vm){
   PGLImage** handle = (PGLImage**)wrenGetSlotForeign(vm, 0); 
   PGLBuffer* buffer = *(PGLBuffer**)wrenGetSlotForeign(vm,1);
   size_t offset = (size_t)wrenGetSlotDouble(vm, 2);
   size_t size = (size_t)wrenGetSlotDouble(vm, 3);
+  int channels = (int)wrenGetSlotDouble(vm, 4);
 
   if(offset+size>buffer->size){
     pgl_wren_runtime_error(vm, "Data size out of bounds");
   }
 
-  PGLImage* image = pglImageFromMemory(buffer->data, offset, size, 4);
+  PGLImage* image = pglImageFromMemory(buffer->data, offset, size, channels);
 
   *handle = image;  
 }
 
-static void Image_allocate_2(WrenVM* vm){
+static void Image_allocate_3(WrenVM* vm){
   PGLImage** handle = (PGLImage**)wrenGetSlotForeign(vm, 0); 
   size_t width = (size_t)wrenGetSlotDouble(vm, 1);
   size_t height = (size_t)wrenGetSlotDouble(vm, 2);
+  int channels = (int)wrenGetSlotDouble(vm, 3);
 
-  PGLImage* image = pglImageCreate(width, height, 4);
+  PGLImage* image = pglImageCreate(width, height, channels);
 
   *handle = image;  
 }
@@ -62,35 +65,17 @@ static void Image_put_7(WrenVM* vm){
   pglImageBlit(dst, src, sx, sy, sw, sh, dx, dy);
 }
 
-static void Image_setPixel_6(WrenVM* vm){
-  PGLImage* image = *(PGLImage**)wrenGetSlotForeign(vm, 0); 
-  unsigned int x = (unsigned int)wrenGetSlotDouble(vm, 1);
-  unsigned int y = (unsigned int)wrenGetSlotDouble(vm, 2);
-  if(x >= image->width || y >= image->height){
-    pgl_wren_runtime_error(vm, "Pixel out of bounds");
-  }
-  unsigned char r = (unsigned char)wrenGetSlotDouble(vm, 3);
-  unsigned char g = (unsigned char)wrenGetSlotDouble(vm, 4);
-  unsigned char b = (unsigned char)wrenGetSlotDouble(vm, 5);
-  unsigned char a = (unsigned char)wrenGetSlotDouble(vm, 6);
-
-  unsigned char* pixel = &image->pixels[(y * image->width + x)*image->channels];
-  pixel[0] = r;
-  pixel[1] = g;
-  pixel[2] = b;
-  pixel[3] = a;
-}
-
 static void Image_getPixel_3(WrenVM* vm){
   PGLImage* image = *(PGLImage**)wrenGetSlotForeign(vm, 0); 
   int x = (int)wrenGetSlotDouble(vm, 1);
   int y = (int)wrenGetSlotDouble(vm, 2);
-  if(wrenGetListCount(vm, 3) < 4){
-    pgl_wren_runtime_error(vm, "Expected vec4");
+  int count = wrenGetListCount(vm, 3);
+  if(count < image->channels){
+    pgl_wren_runtime_error(vm, "Pixel vector does not have the right amount of components");
   }
   
   unsigned char* pixel = &image->pixels[(y * image->width + x)*image->channels];
-  for (size_t i = 0; i < 4; i++)
+  for (size_t i = 0; i < image->channels; i++)
   {
     wrenSetSlotDouble(vm, 0, (double)pixel[i]);
     wrenSetListElement(vm, 3, i, 0);
@@ -112,12 +97,13 @@ static void Image_setPixel_3(WrenVM* vm){
   if(x >= image->width || y >= image->height){
     pgl_wren_runtime_error(vm, "Pixel out of bounds");
   }
-  if(wrenGetListCount(vm, 3) < 4){
-    pgl_wren_runtime_error(vm, "Expected vec4");
+  int count = wrenGetListCount(vm, 3);
+  if(count != image->channels){
+    pgl_wren_runtime_error(vm, "Pixel vector does not have the right amount of components");
   }
   
   unsigned char* pixel = &image->pixels[(y * image->width + x)*image->channels];
-  for (size_t i = 0; i < 4; i++)
+  for (size_t i = 0; i < count; i++)
   {
     wrenGetListElement(vm, 3, i, 0);
     unsigned char c = (unsigned char)wrenGetSlotDouble(vm, 0);

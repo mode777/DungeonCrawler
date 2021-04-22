@@ -26,7 +26,7 @@ GameSystem.attach("main"){|sys|
     var t = Quad.new(0,0,txt.width * scale, txt.height * scale)
     
     batch.setSprite(0, s,t, [255,255,255,128])
-    s.set(1,1,1,1)
+    s.set(0,0,32,32)
     t.set(0,0,scale/2, scale/2)
     batch.setSprite(1, s, t, [255,0,0,255])
     batch.setSprite(2, s, t, [255,255,0,255])
@@ -41,13 +41,13 @@ GameSystem.attach("main"){|sys|
       Vec3.add(p, target, target)
 
       // update pointer
-      pointer.set(p[0]*scale-scale/4,p[2]*scale-scale/4,scale/2, scale/2)
+      pointer.set(p[0]*scale-scale/2,p[2]*scale-scale/2,scale, scale)
       batch.setTarget(1, pointer)
       pointertarget.set(target[0]*scale-scale/4,target[2]*scale-scale/4,scale/2, scale/2)
       batch.setTarget(2, pointertarget)
     }
 
-    sys.queue.subscribe(SystemEvents.Draw2){|ev|
+    sys.queue.subscribe(SystemEvents.Draw3){|ev|
       Renderer.set2d()
       cam.enable()
       batch.draw()      

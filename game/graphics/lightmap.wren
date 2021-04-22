@@ -4,7 +4,7 @@ import "graphics" for Colors
 
 class Lightmap is Grid {
   construct new(map){
-    super(map.width, map.height, null, 0)
+    super(map.width, map.height, Colors.Black, null)
     _queue = []
     _visited = {}
     _map = map
